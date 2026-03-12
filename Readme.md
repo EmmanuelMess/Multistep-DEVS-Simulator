@@ -7,7 +7,8 @@ docker build -t multistep-devs:24.04 .
 ### Run
 
 docker run -it \
-       --workdir /root/code \
-       -v $PWD/code/:/root/code/:rw \
-       multistep-devs:24.04 opencode
+       --workdir /root/ws \
+       -v $PWD/code/:/root/ws/code/:rw \
+       -v $PWD/design/:/root/ws/design/:ro \
+       multistep-devs:24.04 bash
 
