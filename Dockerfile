@@ -3,7 +3,8 @@ FROM ubuntu:24.04
 RUN apt-get update && apt-get install -y \
     python3-full \
     python3-pip \
-    curl && \
+    curl \
+    unzip && \
     rm -rf /var/lib/apt/lists/*
     
 RUN curl -fsSL https://opencode.ai/install | bash
@@ -23,6 +24,11 @@ RUN echo node > .nvmrc
 RUN nvm install
 
 RUN npm install -g @ramtinj95/opencode-tokenscope
+
+RUN npm install -g bun
+RUN echo 'export PATH="/root/.bun/bin:${PATH}"' >> ~/.bashrc
+
+RUN bun install -g @os-eco/mulch-cli
 
 COPY ./code/requirements.txt /tmp/requirements.txt
 
