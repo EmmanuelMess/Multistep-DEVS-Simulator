@@ -30,6 +30,10 @@ RUN echo 'export PATH="/root/.bun/bin:${PATH}"' >> ~/.bashrc
 
 RUN bun install -g @os-eco/mulch-cli
 
+RUN apt-get update && apt-get install -y \
+    python-is-python3 && \
+    rm -rf /var/lib/apt/lists/*
+
 COPY ./code/requirements.txt /tmp/requirements.txt
 
 RUN python3 -m pip install --break-system-packages -r /tmp/requirements.txt

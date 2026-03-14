@@ -16,5 +16,7 @@ docker run -it \
        -v $PWD/.opencode/:/root/.config/opencode:rw \
        -v $PWD/code/:/root/ws/code/:rw \
        -v $PWD/design/:/root/ws/design/:ro \
+       -v "$PWD/spec files/:/root/ws/spec files/:ro" \
+       -v $PWD/LAYOUT.md:/root/ws/LAYOUT.md:ro \
        multistep-devs:24.04 bash
 
