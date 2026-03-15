@@ -39,8 +39,11 @@ class Simulator:
             if len(imminent_model_ids) == 0 and len(with_input_model_ids) == 0:
                 break
 
+            # Dedup models
+            all_to_run = set(imminent_model_ids + with_input_model_ids)
+
             # TODO use getters from graph?
-            for model_id in (imminent_model_ids + with_input_model_ids):
+            for model_id in all_to_run:
                 if model_id in already_run_models:
                     print(f"Error: model {model_id} is being run twice at instant {current_time}")
                     exit(1)
