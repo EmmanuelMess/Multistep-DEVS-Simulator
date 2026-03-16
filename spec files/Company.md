@@ -59,17 +59,24 @@ processes, as the `Administration` demands them, via `StartImprovements`.
 - Payments for products goes on the honor system, both for products from the world and products provided by the company.
 - The company cannot go bankrupt, only have negative capital.
 
-## Other details
+## Implementation details
 
 - Names should be consistent with the spec, where possible
 - Each event in the chart contains information to track relevant information, only some of the information is 
 explicitly given (mainly `Employee(i)` and `Product(i)`). As an example of not given data in an event: `Capital`
 constains the amount of capital, and an Id to track the capital event uniquely.
-- Tracking of demand by the modeled company is not specified here and should be done a simple manner, as well as
-tracking of improvements.
 - The list of products is not specified, and should be provided as input to the simulation, the products can be primary,
 intermediate or final, relative to the modeled company.
 - Typing is not part of this spec.
-- Employee pool and availability is part of the parameters passed to the simualation
+- Employee availability is part of the parameters passed to the simulation
+- Tracking of demand by the modeled company is not specified here and should be done a simple manner, as well as
+tracking of improvements.
 - Internal implementations of the Atomic components should be as simple as possible while following the prescriptions 
 of this file.
+- Halt production of the company if there is nothing that can be produced that creates profits: for example
+if there is no demand and an excess of inventory (offerings not sold)
+
+## Math 
+
+- It must be provable that there is no way to generate an infinite loop in the simulation such that
+time stays still ($\delta t = 0$) but the same event occurs twice.
