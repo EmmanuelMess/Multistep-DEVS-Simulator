@@ -3,7 +3,7 @@ from typing import List, Any, Dict, Optional, cast, override
 
 from src.devs.Atomic import Atomic
 from src.devs.IdGenerator import generateId
-from src.devs.Types import Port
+from src.devs.Types import Port, Time
 from src.examples.company.Messages import (
     AssignEmployee, StartImprovements, Improvement,
     RequestEmployee, ImprovementsCost, Employee,
@@ -165,7 +165,7 @@ class RAndD(Atomic):
         return result
 
     @override
-    def time_advance(self) -> float:
+    def time_advance(self) -> Time:
         if self.phase == self.IDLE:
             return float('inf')
         elif self.phase == self.EMIT_COST:

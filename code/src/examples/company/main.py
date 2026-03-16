@@ -1,5 +1,6 @@
 import math
 import random
+import sys
 from typing import List, Tuple, Any, Dict
 
 from src.devs.AtomicGraph import AtomicGraph
@@ -19,12 +20,12 @@ from src.examples.company.Messages import (
 # Simulation configuration
 # ---------------------------------------------------------------------------
 
-PRODUCT_CONFIG = {
+PRODUCT_CONFIG: Dict[str, Dict[str, Any]] = {
     "steel":  {"role": "primary", "cost": 3.0},
     "widget": {"role": "final"},
 }
 
-BILL_OF_MATERIALS = {
+BILL_OF_MATERIALS: Dict[str, Dict[str, Any]] = {
     "widget": {
         "inputs": {"steel": 2},
         "base_time": 5.0,
@@ -250,6 +251,4 @@ def main(mode: str = "scripted"):
 
 
 if __name__ == '__main__':
-    import sys
-    mode = sys.argv[1] if len(sys.argv) > 1 else "scripted"
-    main(mode)
+    main(sys.argv[1])

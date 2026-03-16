@@ -75,7 +75,7 @@ class ExternalSource(Atomic):
         return result
 
     @override
-    def time_advance(self) -> float:
+    def time_advance(self) -> Time:
         if self.next_index >= len(self.events):
             return float('inf')
         if self.time_last_internal_transition is None:

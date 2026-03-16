@@ -3,7 +3,7 @@ from typing import List, Any, Dict, Optional, cast, override
 
 from src.devs.Atomic import Atomic
 from src.devs.IdGenerator import generateId
-from src.devs.Types import Port
+from src.devs.Types import Port, Time
 from src.examples.company.Messages import (
     Product, DemandProduct, OfferProduct, AssignEmployee,
     HaltProduction, Improvement, RequestEmployee, Employee,
@@ -139,7 +139,7 @@ class Manufacturing(Atomic):
                             DemandProduct(generateId("demand_product"), input_type)
                         )
                         self._requested_materials[input_type] = True
-                        print(f"[MFG] {self.id} Requesting raw material '{input_type}'")
+                        print(f"[MFG] {self.id} Requesting raw material {qty}x'{input_type}'")
                 continue
 
             if not self.assigned_employees:
@@ -276,7 +276,7 @@ class Manufacturing(Atomic):
         return result
 
     @override
-    def time_advance(self) -> float:
+    def time_advance(self) -> Time:
         if self.halted and not self._has_pending_output():
             return float('inf')
         if self.producing:

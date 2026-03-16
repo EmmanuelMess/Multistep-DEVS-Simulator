@@ -3,7 +3,7 @@ from typing import List, Any, Dict, cast, override
 
 from src.devs.Atomic import Atomic
 from src.devs.IdGenerator import generateId
-from src.devs.Types import Port
+from src.devs.Types import Port, Time
 from src.examples.company.Messages import (
     Capital, Payment, EmployeeOffering, EmployeeResignation,
     RequestEmployee, ImprovementsCost, AssignEmployee,
@@ -221,6 +221,7 @@ class Administration(Atomic):
             elif port == self.EMPLOYEE_RESIGNATION_IN:
                 for resignation in cast(List[EmployeeResignation], bag):
                     self._remove_employee(resignation.employee)
+                    print(f"[INPUT] {self.id} Received {resignation}")
 
             elif port == self.REQUEST_EMPLOYEE_IN:
                 for request in cast(List[RequestEmployee], bag):
@@ -280,7 +281,7 @@ class Administration(Atomic):
         return False
 
     @override
-    def time_advance(self) -> float:
+    def time_advance(self) -> Time:
         if self._has_pending_output():
             return self.RESPONSE_DELAY
         if self._needs_review():

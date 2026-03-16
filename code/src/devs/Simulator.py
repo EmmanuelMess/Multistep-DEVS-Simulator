@@ -3,13 +3,13 @@ from typing import List
 
 from src.devs.AtomicGraph import AtomicGraph
 from src.devs.Constants import MAX_ITERATIONS
-from src.devs.Types import Id
+from src.devs.Types import Id, Time
 
 
 class Simulator:
     def __init__(self, graph: AtomicGraph) -> None:
         self.graph = graph
-        self.time = 0
+        self.time: Time = 0.0
 
     def simulate(self) -> None:
         next_time = self.graph.min_next_time(self.time)
