@@ -40,7 +40,7 @@ class AtomicGraph:
         return [model.id for model in self.models.values() if model.next_internal_time() == current_time]
 
     @pre(lambda self, model_ids, current_time: all([(model_id in self.models) for model_id in model_ids]))
-    @pre(lambda self, model_ids, current_time: math.isfinite(current_time) and 0 < current_time)
+    @pre(lambda self, model_ids, current_time: math.isfinite(current_time) and 0 <= current_time)
     def route(self, model_ids: List[Id], current_time: float) -> List[Id]:
         """
         Move the outputs for models to input cache for the next model

@@ -1,11 +1,11 @@
 import math
 import random
-from typing import List, Tuple, Any
+from typing import List, Tuple, Any, Dict
 
 from src.devs.AtomicGraph import AtomicGraph
 from src.devs.IdGenerator import generateId
 from src.devs.Simulator import Simulator
-from src.devs.Types import Port
+from src.devs.Types import Port, Time
 from src.examples.company.Administration import Administration
 from src.examples.company.ExternalSource import ExternalSource
 from src.examples.company.Manufacturing import Manufacturing
@@ -44,39 +44,39 @@ PRODUCT_COSTS = {
 # Event generators
 # ---------------------------------------------------------------------------
 
-def generate_scripted_events() -> List[Tuple[float, Port, Any]]:
+def generate_scripted_events() -> Dict[Time, Tuple[Port, Any]]:
     """Hand-crafted event list for a deterministic scenario."""
-    events = []
+    events: Dict[Time, Tuple[Port, Any]] = {}
 
     # Initial capital injection
-    events.append((1.0, ExternalSource.CAPITAL_OUT, Capital(generateId("capital"), 100.0)))
+    events[1.0] = (ExternalSource.CAPITAL_OUT, Capital(generateId("capital"), 100.0))
 
     # Employees arrive over time
-    for i, t in enumerate([2.0, 4.0, 8.0, 15.0]):
+    for t in [2.0, 4.0, 8.0, 15.0]:
         emp = Employee(generateId("employee"))
-        events.append((t, ExternalSource.EMPLOYEE_OFFERING_OUT,
-                        EmployeeOffering(generateId("emp_offer"), emp)))
+        events[t] = (ExternalSource.EMPLOYEE_OFFERING_OUT,
+                        EmployeeOffering(generateId("emp_offer"), emp))
 
     # Customer demand for widgets
     for t in [3.0, 6.0, 10.0, 14.0, 18.0, 22.0, 30.0, 35.0]:
-        events.append((t, ExternalSource.DEMAND_PRODUCT_OUT,
-                        DemandProduct(generateId("demand"), "widget")))
+        events[t] = (ExternalSource.DEMAND_PRODUCT_OUT,
+                        DemandProduct(generateId("demand"), "widget"))
 
     # Raw material deliveries (steel)
     for t in [5.0, 7.0, 9.0, 11.0, 13.0, 16.0, 20.0, 24.0, 28.0, 32.0, 36.0]:
-        events.append((t, ExternalSource.PRODUCT_OUT,
-                        Product(generateId("product"), "steel")))
+        events[t] = (ExternalSource.PRODUCT_OUT,
+                        Product(generateId("product"), "steel"))
 
     # Payments for products we ship (honor system — the outside pays after some delay)
     for t in [25.0, 33.0, 40.0]:
-        events.append((t, ExternalSource.PAYMENT_OUT,
-                        Payment(generateId("payment"), 10.0)))
+        events[t] = (ExternalSource.PAYMENT_OUT,
+                        Payment(generateId("payment"), 10.0))
 
     # An employee resigns midway
     # (We pick a symbolic id — matches by id field, not object identity)
-    events.append((26.0, ExternalSource.EMPLOYEE_RESIGNATION_OUT,
+    events[26.0] = (ExternalSource.EMPLOYEE_RESIGNATION_OUT,
                     EmployeeResignation(generateId("resign"),
-                                        Employee("<employee:2>"))))
+                                        Employee("<employee:2>")))
 
     return events
 
@@ -84,14 +84,14 @@ def generate_scripted_events() -> List[Tuple[float, Port, Any]]:
 def generate_random_events(
     seed: int = 42,
     max_time: float = 100.0,
-) -> List[Tuple[float, Port, Any]]:
+) -> Dict[Time, Tuple[Port, Any]]:
     """Generate events from exponential inter-arrival distributions."""
     rng = random.Random(seed)
-    events: List[Tuple[float, Port, Any]] = []
+    events: Dict[Time, Tuple[Port, Any]] = {}
 
     # Capital — one-shot at start
-    events.append((0.5, ExternalSource.CAPITAL_OUT,
-                    Capital(generateId("capital"), 100.0)))
+    events[0.5] = (ExternalSource.CAPITAL_OUT,
+                    Capital(generateId("capital"), 100.0))
 
     # Customer demand (exponential, mean 5.0)
     t = 0.0
@@ -99,8 +99,8 @@ def generate_random_events(
         t += rng.expovariate(1.0 / 5.0)
         if t > max_time:
             break
-        events.append((t, ExternalSource.DEMAND_PRODUCT_OUT,
-                        DemandProduct(generateId("demand"), "widget")))
+        events[t] = (ExternalSource.DEMAND_PRODUCT_OUT,
+                        DemandProduct(generateId("demand"), "widget"))
 
     # Raw material deliveries (exponential, mean 3.0)
     t = 1.0
@@ -108,8 +108,8 @@ def generate_random_events(
         t += rng.expovariate(1.0 / 3.0)
         if t > max_time:
             break
-        events.append((t, ExternalSource.PRODUCT_OUT,
-                        Product(generateId("product"), "steel")))
+        events[t] = (ExternalSource.PRODUCT_OUT,
+                        Product(generateId("product"), "steel"))
 
     # Employee offerings (exponential, mean 8.0)
     t = 1.0
@@ -118,8 +118,8 @@ def generate_random_events(
         if t > max_time:
             break
         emp = Employee(generateId("employee"))
-        events.append((t, ExternalSource.EMPLOYEE_OFFERING_OUT,
-                        EmployeeOffering(generateId("emp_offer"), emp)))
+        events[t] = (ExternalSource.EMPLOYEE_OFFERING_OUT,
+                        EmployeeOffering(generateId("emp_offer"), emp))
 
     # Payments (exponential, mean 10.0, smaller count)
     t = 15.0
@@ -127,9 +127,9 @@ def generate_random_events(
         t += rng.expovariate(1.0 / 10.0)
         if t > max_time:
             break
-        events.append((t, ExternalSource.PAYMENT_OUT,
+        events[t] = (ExternalSource.PAYMENT_OUT,
                         Payment(generateId("payment"),
-                                round(rng.uniform(5.0, 20.0), 2))))
+                                round(rng.uniform(5.0, 20.0), 2)))
 
     return events
 
@@ -138,7 +138,7 @@ def generate_random_events(
 # Wiring
 # ---------------------------------------------------------------------------
 
-def build_graph(events: List[Tuple[float, Port, Any]]) -> Tuple[AtomicGraph, Simulator]:
+def build_graph(events: Dict[Time, Tuple[Port, Any]]) -> Tuple[AtomicGraph, Simulator]:
     graph = AtomicGraph()
     simulator = Simulator(graph)
 

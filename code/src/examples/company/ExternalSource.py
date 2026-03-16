@@ -3,7 +3,7 @@ from typing import List, Any, Dict, Tuple, override
 
 from src.devs.Atomic import Atomic
 from src.devs.IdGenerator import generateId
-from src.devs.Types import Port
+from src.devs.Types import Port, Time
 from src.examples.company.Messages import (
     Capital, Payment, EmployeeOffering, EmployeeResignation,
     DemandProduct, Product,
@@ -29,16 +29,16 @@ class ExternalSource(Atomic):
     DEMAND_PRODUCT_OUT = (4, DemandProduct)
     PRODUCT_OUT = (5, Product)
 
-    def __init__(self, events: List[Tuple[float, Port, Any]], name: str = "external_source"):
+    def __init__(self, events: Dict[Time, Tuple[Port, Any]]):
         """
-        events: list of (time, port, message), need not be sorted.
+        events: Dict of {Time: (port, message)}, need not be sorted.
         """
-        super().__init__(generateId(name))
+        super().__init__(generateId("external_source"))
 
-        self.events = sorted(events, key=lambda e: e[0])
+        self.events: List[Tuple[Time, Tuple[Port, Any]]] = sorted(events.items())
         self.next_index: int = 0
         self.output_buffer: Dict[Port, List[Any]] = {}
-        self._next_fire_time: float = 0.0
+        self._next_fire_time: Time = 0.0
 
         # Register all output ports unconditionally so connections work
         # regardless of which event types are in the list.
@@ -49,25 +49,19 @@ class ExternalSource(Atomic):
         ]:
             self.set_outport(port)
 
-        # Pre-load first batch
-        self._prepare_next_batch()
-
-    def _prepare_next_batch(self):
-        """Load the next batch of same-timestamp events into output_buffer."""
-        self.output_buffer = {}
-        if self.next_index >= len(self.events):
-            return
-        target_time = self.events[self.next_index][0]
-        while (self.next_index < len(self.events)
-               and self.events[self.next_index][0] == target_time):
-            _, port, msg = self.events[self.next_index]
-            self.output_buffer.setdefault(port, []).append(msg)
-            self.next_index += 1
-        self._next_fire_time = target_time
-
     @override
     def delta_internal(self):
-        self._prepare_next_batch()
+        if self.next_index >= len(self.events):
+            return
+        target_time, _ = self.events[self.next_index]
+        current_messages = filter(lambda e: e[0] == target_time, self.events)
+
+        self.output_buffer = {}
+        for _, (port, msg) in current_messages:
+            self.output_buffer.setdefault(port, []).append(msg)
+            self.next_index += 1
+
+        self._next_fire_time = target_time
 
     @override
     def delta_external(self, inputs: Dict[Port, List[Any]], elapsed_time: float):
@@ -82,7 +76,7 @@ class ExternalSource(Atomic):
 
     @override
     def time_advance(self) -> float:
-        if not self.output_buffer:
+        if self.next_index >= len(self.events):
             return float('inf')
         if self.time_last_internal_transition is None:
             return self._next_fire_time
