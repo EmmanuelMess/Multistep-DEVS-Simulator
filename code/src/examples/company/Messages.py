@@ -1,95 +1,97 @@
 from dataclasses import dataclass
 
+from src.devs.Types import Id
+
 
 @dataclass
 class Product:
-    id: str
+    id: Id
     product_type: str
 
 
 @dataclass
 class DemandProduct:
-    id: str
+    id: Id
     product_type: str
 
 
 @dataclass
 class OfferProduct:
-    id: str
+    id: Id
     product_type: str
 
 
 @dataclass
 class Capital:
-    id: str
+    id: Id
     amount: float
 
 
 @dataclass
 class Payment:
-    id: str
+    id: Id
     amount: float
 
 
 @dataclass
 class Employee:
-    id: str
+    id: Id
 
 
 @dataclass
 class EmployeeOffering:
-    id: str
+    id: Id
     employee: Employee
 
 
 @dataclass
 class EmployeeResignation:
-    id: str
+    id: Id
     employee: Employee
 
 
 @dataclass
 class LookingForEmployee:
-    id: str
+    id: Id
 
 
 @dataclass
 class FireEmployee:
-    id: str
+    id: Id
     employee: Employee
 
 
 @dataclass
 class AssignEmployee:
-    id: str
+    id: Id
     employee: Employee
 
 
 @dataclass
 class HaltProduction:
-    id: str
+    id: Id
 
 
 @dataclass
 class RequestEmployee:
-    id: str
+    id: Id
     sender: str
 
 
 @dataclass
 class StartImprovements:
-    id: str
+    id: Id
     product_type: str
 
 
 @dataclass
 class Improvement:
-    id: str
+    id: Id
     product_type: str
     efficiency_gain: float
 
 
 @dataclass
 class ImprovementsCost:
-    id: str
+    id: Id
     cost: float

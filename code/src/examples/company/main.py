@@ -36,10 +36,6 @@ PRODUCIBLE_PRODUCTS = [
     pt for pt, cfg in PRODUCT_CONFIG.items() if cfg["role"] in ("final", "intermediate")
 ]
 
-PRODUCT_COSTS = {
-    pt: cfg["cost"] for pt, cfg in PRODUCT_CONFIG.items() if "cost" in cfg
-}
-
 
 # ---------------------------------------------------------------------------
 # Event generators
@@ -48,36 +44,35 @@ PRODUCT_COSTS = {
 def generate_scripted_events() -> Dict[Time, Tuple[Port, Any]]:
     """Hand-crafted event list for a deterministic scenario."""
     events: Dict[Time, Tuple[Port, Any]] = {}
+    employees: List[Employee] = []
 
     # Initial capital injection
     events[1.0] = (ExternalSource.CAPITAL_OUT, Capital(generateId("capital"), 100.0))
 
     # Employees arrive over time
     for t in [2.0, 4.0, 8.0, 15.0]:
-        emp = Employee(generateId("employee"))
+        employee = Employee(generateId("employee"))
         events[t] = (ExternalSource.EMPLOYEE_OFFERING_OUT,
-                        EmployeeOffering(generateId("emp_offer"), emp))
+                        EmployeeOffering(generateId("employee_offer"), employee))
+        employees.append(employee)
+
+    # An employee resigns midway
+    # (We pick a symbolic id — matches by id field, not object identity)
+    events[26.0] = (
+        ExternalSource.EMPLOYEE_RESIGNATION_OUT,
+        EmployeeResignation(generateId("resign"), employees[1])
+    )
 
     # Customer demand for widgets
     for t in [3.0, 6.0, 10.0, 14.0, 18.0, 22.0, 30.0, 35.0]:
-        events[t] = (ExternalSource.DEMAND_PRODUCT_OUT,
-                        DemandProduct(generateId("demand"), "widget"))
+        events[t] = (ExternalSource.DEMAND_PRODUCT_OUT, DemandProduct(generateId("demand"), "widget"))
+        # Payments for products we ship (honor system — the outside pays after some delay)
+        events[t + 2] = (ExternalSource.PAYMENT_OUT, Payment(generateId("payment"), 10.0))
 
     # Raw material deliveries (steel)
     for t in [5.0, 7.0, 9.0, 11.0, 13.0, 16.0, 20.0, 24.0, 28.0, 32.0, 36.0]:
         events[t] = (ExternalSource.PRODUCT_OUT,
                         Product(generateId("product"), "steel"))
-
-    # Payments for products we ship (honor system — the outside pays after some delay)
-    for t in [25.0, 33.0, 40.0]:
-        events[t] = (ExternalSource.PAYMENT_OUT,
-                        Payment(generateId("payment"), 10.0))
-
-    # An employee resigns midway
-    # (We pick a symbolic id — matches by id field, not object identity)
-    events[26.0] = (ExternalSource.EMPLOYEE_RESIGNATION_OUT,
-                    EmployeeResignation(generateId("resign"),
-                                        Employee("<employee:2>")))
 
     return events
 
@@ -91,8 +86,7 @@ def generate_random_events(
     events: Dict[Time, Tuple[Port, Any]] = {}
 
     # Capital — one-shot at start
-    events[0.5] = (ExternalSource.CAPITAL_OUT,
-                    Capital(generateId("capital"), 100.0))
+    events[0.5] = (ExternalSource.CAPITAL_OUT, Capital(generateId("capital"), 100.0))
 
     # Customer demand (exponential, mean 5.0)
     t = 0.0
@@ -100,8 +94,7 @@ def generate_random_events(
         t += rng.expovariate(1.0 / 5.0)
         if t > max_time:
             break
-        events[t] = (ExternalSource.DEMAND_PRODUCT_OUT,
-                        DemandProduct(generateId("demand"), "widget"))
+        events[t] = (ExternalSource.DEMAND_PRODUCT_OUT, DemandProduct(generateId("demand"), "widget"))
 
     # Raw material deliveries (exponential, mean 3.0)
     t = 1.0
@@ -109,8 +102,7 @@ def generate_random_events(
         t += rng.expovariate(1.0 / 3.0)
         if t > max_time:
             break
-        events[t] = (ExternalSource.PRODUCT_OUT,
-                        Product(generateId("product"), "steel"))
+        events[t] = (ExternalSource.PRODUCT_OUT, Product(generateId("product"), "steel"))
 
     # Employee offerings (exponential, mean 8.0)
     t = 1.0
@@ -119,18 +111,14 @@ def generate_random_events(
         if t > max_time:
             break
         emp = Employee(generateId("employee"))
-        events[t] = (ExternalSource.EMPLOYEE_OFFERING_OUT,
-                        EmployeeOffering(generateId("emp_offer"), emp))
+        events[t] = (ExternalSource.EMPLOYEE_OFFERING_OUT, EmployeeOffering(generateId("employee_offer"), emp))
 
-    # Payments (exponential, mean 10.0, smaller count)
-    t = 15.0
-    for _ in range(20):
-        t += rng.expovariate(1.0 / 10.0)
-        if t > max_time:
-            break
-        events[t] = (ExternalSource.PAYMENT_OUT,
-                        Payment(generateId("payment"),
-                                round(rng.uniform(5.0, 20.0), 2)))
+        payment_t = t + rng.expovariate(1.0 / 10.0)
+        pay = round(rng.uniform(5.0, 20.0), 2)
+        events[payment_t] = (
+            ExternalSource.PAYMENT_OUT,
+            Payment(generateId("payment"), pay)
+        )
 
     return events
 
@@ -146,7 +134,6 @@ def build_graph(events: Dict[Time, Tuple[Port, Any]]) -> Tuple[AtomicGraph, Simu
     # --- Create models ---
     manufacturing = Manufacturing(
         bill_of_materials=BILL_OF_MATERIALS,
-        product_config=PRODUCT_CONFIG,
     )
     rd = RAndD(
         improvement_duration=10.0,
@@ -155,10 +142,8 @@ def build_graph(events: Dict[Time, Tuple[Port, Any]]) -> Tuple[AtomicGraph, Simu
     )
     admin = Administration(
         mfg_id=manufacturing.id,
-        rd_id=rd.id,
+        rnd_id=rd.id,
         producible_products=PRODUCIBLE_PRODUCTS,
-        product_costs=PRODUCT_COSTS,
-        markup_factor=1.5,
         max_employees=10,
     )
     source = ExternalSource(events)

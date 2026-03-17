@@ -42,12 +42,11 @@ class ExternalSource(Atomic):
 
         # Register all output ports unconditionally so connections work
         # regardless of which event types are in the list.
-        for port in [
+        self.set_outports([
             self.CAPITAL_OUT, self.PAYMENT_OUT, self.EMPLOYEE_OFFERING_OUT,
             self.EMPLOYEE_RESIGNATION_OUT, self.DEMAND_PRODUCT_OUT,
             self.PRODUCT_OUT,
-        ]:
-            self.set_outport(port)
+        ])
 
     @override
     def delta_internal(self):
@@ -70,8 +69,8 @@ class ExternalSource(Atomic):
     @override
     def output(self) -> Dict[Port, List[Any]]:
         result = deepcopy(self.output_buffer) if self.output_buffer else {}
-        if result:
-            print(f"[OUTPUT] {self.id} Sent {result}")
+        for _, messages in result:
+            print(f"[OUTSIDE-INPUT] {self.id} Sent {messages}")
         return result
 
     @override

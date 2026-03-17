@@ -59,11 +59,8 @@ class RAndD(Atomic):
         self._queued_improvements: List[str] = []
 
         # Register ports
-        self.set_inport(self.ASSIGN_EMPLOYEE_IN)
-        self.set_inport(self.START_IMPROVEMENTS_IN)
-        self.set_outport(self.IMPROVEMENT_OUT)
-        self.set_outport(self.REQUEST_EMPLOYEE_OUT)
-        self.set_outport(self.IMPROVEMENTS_COST_OUT)
+        self.set_inports([self.ASSIGN_EMPLOYEE_IN, self.START_IMPROVEMENTS_IN])
+        self.set_outports([self.IMPROVEMENT_OUT, self.REQUEST_EMPLOYEE_OUT, self.IMPROVEMENTS_COST_OUT])
 
     # ------------------------------------------------------------------
     def _clear_buffers(self):
@@ -102,7 +99,10 @@ class RAndD(Atomic):
 
         elif self.phase == self.WORKING:
             # Work complete — prepare improvement for emission
-            assert self.current_improvement is not None
+            if self.current_improvement is None:
+                print(f"Error: {self.current_improvement} is None")
+                exit(1)
+
             self._out_improvement.append(
                 Improvement(
                     generateId("improvement"),
@@ -160,8 +160,8 @@ class RAndD(Atomic):
         if self._out_cost:
             result[self.IMPROVEMENTS_COST_OUT] = deepcopy(self._out_cost)
 
-        if result:
-            print(f"[OUTPUT] {self.id} Sent {result}")
+        for _, messages in result:
+            print(f"[OUTPUT] {self.id} Sent {messages}")
         return result
 
     @override

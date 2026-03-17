@@ -39,18 +39,14 @@ class Administration(Atomic):
     def __init__(
         self,
         mfg_id: str,
-        rd_id: str,
+        rnd_id: str,
         producible_products: List[str],
-        product_costs: Dict[str, float],
-        markup_factor: float = 1.5,
         max_employees: int = 10,
     ):
         super().__init__(generateId("administration"))
         self._mfg_id = mfg_id
-        self._rd_id = rd_id
+        self._rnd_id = rnd_id
         self._producible_products = producible_products
-        self._product_costs = product_costs
-        self._markup_factor = markup_factor
         self._max_employees = max_employees
 
         # State
@@ -76,22 +72,20 @@ class Administration(Atomic):
         self._out_start_imp: List[StartImprovements] = []
         self._out_looking: List[LookingForEmployee] = []
         self._out_fire: List[FireEmployee] = []
-        self._out_payment: List[Payment] = []
+        self._out_payment: List[Payment] = []  # TODO actually implement outpayments
 
         # Register ports
-        for port in [
+        self.set_inports([
             self.CAPITAL_IN, self.PAYMENT_IN, self.EMPLOYEE_OFFERING_IN,
             self.EMPLOYEE_RESIGNATION_IN, self.REQUEST_EMPLOYEE_IN,
             self.IMPROVEMENTS_COST_IN,
-        ]:
-            self.set_inport(port)
-        for port in [
+        ])
+        self.set_outports([
             self.ASSIGN_EMPLOYEE_MFG_OUT, self.ASSIGN_EMPLOYEE_RD_OUT,
             self.HALT_PRODUCTION_OUT, self.START_IMPROVEMENTS_OUT,
             self.LOOKING_FOR_EMPLOYEE_OUT, self.FIRE_EMPLOYEE_OUT,
             self.PAYMENT_OUT,
-        ]:
-            self.set_outport(port)
+        ])
 
     # ------------------------------------------------------------------
     def _has_pending_output(self) -> bool:
@@ -123,7 +117,7 @@ class Administration(Atomic):
                 if self.halted_production:
                     self.halted_production = False
                 print(f"[ADMIN] {self.id} Assign {emp.id} -> Manufacturing")
-            elif req.sender == self._rd_id:
+            elif req.sender == self._rnd_id:
                 self._out_assign_rd.append(assign)
                 self.rd_employees.append(emp)
                 print(f"[ADMIN] {self.id} Assign {emp.id} -> R&D")
@@ -180,7 +174,7 @@ class Administration(Atomic):
             ]
             self._improvement_product_index += 1
             self._out_start_imp.append(
-                StartImprovements(generateId("start_imp"), product)
+                StartImprovements(generateId("start_improvement"), product)
             )
             self._improvements_cooldown = self.IMPROVEMENTS_COOLDOWN_REVIEWS
             print(f"[ADMIN] {self.id} Starting R&D improvements for '{product}'")
@@ -257,8 +251,9 @@ class Administration(Atomic):
         if self._out_payment:
             result[self.PAYMENT_OUT] = deepcopy(self._out_payment)
 
-        if result:
-            print(f"[OUTPUT] {self.id} Sent {result}")
+        for _, messages in result:
+            print(f"[OUTPUT] {self.id} Sent {messages}")
+
         return result
 
     def _needs_review(self) -> bool:

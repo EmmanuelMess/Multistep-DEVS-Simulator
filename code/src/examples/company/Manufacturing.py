@@ -1,5 +1,7 @@
 from copy import deepcopy
-from typing import List, Any, Dict, Optional, cast, override
+from typing import List, Any, Dict, Optional, cast, override, Set
+
+from deal import pre
 
 from src.devs.Atomic import Atomic
 from src.devs.IdGenerator import generateId
@@ -30,7 +32,6 @@ class Manufacturing(Atomic):
     def __init__(
         self,
         bill_of_materials: Dict[str, Dict],
-        product_config: Dict[str, Dict],
     ):
         """
         bill_of_materials: {product_type: {"inputs": {input_type: qty}, "base_time": float}}
@@ -39,7 +40,6 @@ class Manufacturing(Atomic):
         super().__init__(generateId("manufacturing"))
 
         self.bill_of_materials = bill_of_materials
-        self.product_config = product_config
 
         # Inventory of finished / intermediate goods
         self.inventory: Dict[str, List[Product]] = {}
@@ -71,17 +71,15 @@ class Manufacturing(Atomic):
         self._out_request_emp: List[RequestEmployee] = []
 
         # Register ports
-        for port in [
+        self.set_inports([
             self.DEMAND_PRODUCT_IN, self.PRODUCT_IN,
             self.ASSIGN_EMPLOYEE_IN, self.HALT_PRODUCTION_IN,
             self.IMPROVEMENT_IN,
-        ]:
-            self.set_inport(port)
-        for port in [
+        ])
+        self.set_outports([
             self.PRODUCT_OUT, self.DEMAND_PRODUCT_OUT,
             self.OFFER_PRODUCT_OUT, self.REQUEST_EMPLOYEE_OUT,
-        ]:
-            self.set_outport(port)
+        ])
 
     # ------------------------------------------------------------------
     def _has_pending_output(self) -> bool:
@@ -112,8 +110,9 @@ class Manufacturing(Atomic):
     def _idle_employees(self) -> List[Employee]:
         return self.assigned_employees
 
-    def _production_time(self, product_type: str) -> float:
-        return max(self.efficiency.get(product_type, 5.0), self.MIN_BASE_TIME)
+    @pre(lambda self, product_type: product_type in self.efficiency)
+    def _production_time(self, product_type: str) -> Time:
+        return max(self.efficiency[product_type], self.MIN_BASE_TIME)
 
     def _has_demand(self) -> bool:
         return any(d > 0 for d in self.demand.values())
@@ -173,7 +172,7 @@ class Manufacturing(Atomic):
 
     def _offer_surplus(self):
         """Offer products in inventory that have no pending demand."""
-        offered = set()
+        offered: Set[str] = set()
         for product_type, products in self.inventory.items():
             if products and self.demand.get(product_type, 0) <= 0 and product_type not in offered:
                 self._out_offer.append(
@@ -271,8 +270,8 @@ class Manufacturing(Atomic):
         if self._out_request_emp:
             result[self.REQUEST_EMPLOYEE_OUT] = deepcopy(self._out_request_emp)
 
-        if result:
-            print(f"[OUTPUT] {self.id} Sent {result}")
+        for _, messages in result:
+            print(f"[OUTPUT] {self.id} Sent {messages}")
         return result
 
     @override
