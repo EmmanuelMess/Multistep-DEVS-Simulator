@@ -1,6 +1,8 @@
 # Multistep DEVS simulator
 
-<img src="./images/atomic.png" height="200px"/>
+<p align="center">
+<img src="./images/atomic.png" height="400px"/>
+</p>
 
 ## Description
 
@@ -9,7 +11,7 @@ Implements a discrete event system specification (DEVS) simulator which runs unt
 
 ## Usage
 
-```
+```bash
 cd code
 python3 -m venv venv
 source venv/bin/activate
@@ -20,7 +22,9 @@ Then you can use `src/devs` as a library.
 
 ### Class diagram
 
-<img src="./design/class diagrams/class diagram.svg" height="200px"/>
+<p align="center">
+<img src="./design/class diagrams/class diagram.svg" height="400px"/>
+</p>
 
 ## Examples
 
@@ -28,18 +32,22 @@ Some example usages
 
 ### Factories
 
-<img src="./design/DEVS diagrams/factories/DEVS module.svg" height="200px"/>
+<p align="center">
+<img src="./design/DEVS diagrams/factories/DEVS module.svg" height="400px"/>
+</p>
 
-```
+```bash
 cd code
 python3 src/examples/factories/main.py
 ```
 
 ### Company
 
-<img src="./design/DEVS diagrams/company/DEVS module.svg" height="200px"/>
+<p align="center">
+<img src="./design/DEVS diagrams/company/DEVS module.svg" height="400px"/>
+</p>
 
-```
+```bash
 cd code
 python3 src/examples/factories/main.py
 ```
@@ -48,10 +56,13 @@ python3 src/examples/factories/main.py
 
 ### Build
 
+```bash
 docker build -t multistep-devs:24.04 .
+```
 
 ### Run
 
+```bash
 docker run -it \
        --workdir /root/ws \
        -v ~/.local/share/opencode:/root/.local/share/opencode:rw \
@@ -63,6 +74,7 @@ docker run -it \
        -v "$PWD/spec files/:/root/ws/spec files/:ro" \
        -v $PWD/LAYOUT.md:/root/ws/LAYOUT.md:ro \
        multistep-devs:24.04 bash
+```
 
 ## License
 
