@@ -1,3 +1,4 @@
+from src.devs.Constants import MAX_PORTS
 from abc import ABCMeta, abstractmethod
 from math import isfinite
 from typing import Dict, Optional, List, Any
@@ -50,14 +51,18 @@ class Atomic(metaclass=ABCMeta):
 
         return self.time_last_internal_transition + self.time_advance()
 
+    @ensure(lambda self, port, result: len(self.input_ports) + len(self.output_ports) <= MAX_PORTS)
     def set_inport(self, port: Port) -> None:
         self.input_ports.append(port)
 
+    @ensure(lambda self, port, result: len(self.input_ports) + len(self.output_ports) <= MAX_PORTS)
     def set_inports(self, ports: List[Port]) -> None:
         self.input_ports += ports
 
+    @ensure(lambda self, port, result: len(self.input_ports) + len(self.output_ports) <= MAX_PORTS)
     def set_outport(self, port: Port) -> None:
         self.output_ports.append(port)
 
+    @ensure(lambda self, port, result: len(self.input_ports) + len(self.output_ports) <= MAX_PORTS)
     def set_outports(self, ports: List[Port]) -> None:
         self.output_ports += ports

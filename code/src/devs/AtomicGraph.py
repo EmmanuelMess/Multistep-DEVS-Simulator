@@ -1,9 +1,11 @@
+from deal import post
 import math
 from typing import Dict, List, Any, Tuple
 
 from deal import pre, ensure
 
 from src.devs.Atomic import Atomic
+from src.devs.Constants import MAX_ATOMICS
 from src.devs.Types import Id, Port, Time
 
 
@@ -16,6 +18,7 @@ class AtomicGraph:
         self.models_input_cache: Dict[Id, Dict[Port, List[Any]]] = {}
 
     @pre(lambda self, model: model.id not in self.models.keys())
+    @ensure(lambda self, model, result: len(self.models) <= MAX_ATOMICS)
     def add(self, model: Atomic) -> None:
         self.models[model.id] = model
 
