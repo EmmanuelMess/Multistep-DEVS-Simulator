@@ -113,8 +113,8 @@
         <mxCell id="qCmRSnJ7KuCYvRzvvA8H-46" value="{ Capital, Payment }" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
           <mxGeometry x="190" y="550" width="130" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="qCmRSnJ7KuCYvRzvvA8H-47" value="{&amp;nbsp;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;OfferProduct }&lt;/span&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
-          <mxGeometry x="1122" y="470" width="180" height="30" as="geometry" />
+        <mxCell id="qCmRSnJ7KuCYvRzvvA8H-47" value="{ OfferProduct(Product(i))&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;&amp;nbsp;}&lt;/span&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="1112" y="470" width="180" height="30" as="geometry" />
         </mxCell>
         <mxCell id="qCmRSnJ7KuCYvRzvvA8H-48" value="" style="html=1;rounded=0;" parent="1" vertex="1">
           <mxGeometry x="1302" y="490" width="30" height="30" as="geometry" />
@@ -214,7 +214,7 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="qCmRSnJ7KuCYvRzvvA8H-91" value="{ EmployeeResignation(Employee(i)),&amp;nbsp;&lt;div&gt;EmployeeOffering(Employee(i)) }&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+        <mxCell id="qCmRSnJ7KuCYvRzvvA8H-91" value="{ EmployeeResignation(Employee(i)),&amp;nbsp;&lt;div&gt;EmployeeOffering(Employee(i)), OfferProduct(Product(i)) }&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
           <mxGeometry x="150" y="370" width="210" height="50" as="geometry" />
         </mxCell>
         <mxCell id="qCmRSnJ7KuCYvRzvvA8H-97" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.75;entryY=0;entryDx=0;entryDy=0;exitX=1;exitY=0.25;exitDx=0;exitDy=0;" parent="1" source="qCmRSnJ7KuCYvRzvvA8H-92" target="qCmRSnJ7KuCYvRzvvA8H-19" edge="1">
