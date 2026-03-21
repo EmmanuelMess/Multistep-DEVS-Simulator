@@ -10,3 +10,4 @@ To implement the specification file $ARGUMENTS[0]:
 4. The user should read and address all previous issues, taking the new information into account, and repeat from point 1. When there are no more issues to deal with continue with point 4.
 5. Generate an implementation.
 6. Review the generated implementation: reread all generated source files, and the specification $ARGUMENTS[0], check that all points of the specification are met, if any are missing or contradicted by the implementation, inform the user in a list and abort the implementation.
+8. Run, execute tests and perform other necessary checks. Implement final cosmetic changes.
