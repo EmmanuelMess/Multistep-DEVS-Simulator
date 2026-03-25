@@ -1,0 +1,17 @@
+{
+  "id": "91eb1cb6-b8ef-80d8-8007-bfd3c3dddd22",
+  "name": "Window view",
+  "flows": {
+    "91eb1cb6-b8ef-80d8-8007-bfe0a2d05532": {
+      "id": "91eb1cb6-b8ef-80d8-8007-bfe0a2d05532",
+      "name": "Flow 1",
+      "startingFrame": "91eb1cb6-b8ef-80d8-8007-bfe08aefaf1c"
+    },
+    "616d077f-fecc-8001-8007-c46a44e32b3f": {
+      "id": "616d077f-fecc-8001-8007-c46a44e32b3f",
+      "name": "Flow 2",
+      "startingFrame": "616d077f-fecc-8001-8007-c46a44d443af"
+    }
+  },
+  "index": 2
+}

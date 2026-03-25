@@ -1,0 +1,151 @@
+{
+  "id": "616d077f-fecc-8001-8007-c46a44d4bcd2",
+  "name": "messages",
+  "type": "text",
+  "x": 1948,
+  "y": 1529,
+  "width": 40,
+  "height": 12,
+  "rotation": 0,
+  "selrect": {
+    "x": 1948,
+    "y": 1529,
+    "width": 40,
+    "height": 12,
+    "x1": 1948,
+    "y1": 1529,
+    "x2": 1988,
+    "y2": 1541
+  },
+  "points": [
+    {
+      "x": 1948,
+      "y": 1529
+    },
+    {
+      "x": 1988,
+      "y": 1529
+    },
+    {
+      "x": 1988,
+      "y": 1541
+    },
+    {
+      "x": 1948,
+      "y": 1541
+    }
+  ],
+  "transform": {
+    "a": 1.0,
+    "b": 0.0,
+    "c": 0.0,
+    "d": 1.0,
+    "e": 0.0,
+    "f": 0.0
+  },
+  "transformInverse": {
+    "a": 1.0,
+    "b": 0.0,
+    "c": 0.0,
+    "d": 1.0,
+    "e": 0.0,
+    "f": 0.0
+  },
+  "parentId": "616d077f-fecc-8001-8007-c46a44d4bccf",
+  "frameId": "616d077f-fecc-8001-8007-c46a44d4bccd",
+  "flipX": null,
+  "flipY": null,
+  "growType": "auto-width",
+  "content": {
+    "type": "root",
+    "children": [
+      {
+        "type": "paragraph-set",
+        "children": [
+          {
+            "lineHeight": "1.2",
+            "fontStyle": "normal",
+            "children": [
+              {
+                "lineHeight": "1.2",
+                "fontStyle": "normal",
+                "textTransform": "capitalize",
+                "textAlign": "left",
+                "fontId": "sourcesanspro",
+                "fontSize": "10",
+                "fontWeight": "400",
+                "textDirection": "ltr",
+                "fontVariantId": "regular",
+                "textDecoration": "none",
+                "letterSpacing": "0",
+                "fills": [
+                  {
+                    "fillColor": "#000000",
+                    "fillOpacity": 1
+                  }
+                ],
+                "fontFamily": "sourcesanspro",
+                "text": "messages"
+              }
+            ],
+            "textTransform": "capitalize",
+            "textAlign": "right",
+            "fontId": "sourcesanspro",
+            "key": "1bdmf",
+            "fontSize": "10",
+            "fontWeight": "400",
+            "textDirection": "rtl",
+            "type": "paragraph",
+            "fontVariantId": "regular",
+            "textDecoration": "none",
+            "letterSpacing": "0",
+            "fills": [
+              {
+                "fillColor": "#000000",
+                "fillOpacity": 1
+              }
+            ],
+            "fontFamily": "sourcesanspro"
+          }
+        ]
+      }
+    ],
+    "verticalAlign": "center"
+  },
+  "hideInViewer": false,
+  "touched": [
+    "modifiable-group"
+  ],
+  "shapeRef": "63d18e0a-02ee-80c2-8007-bfaecf08efbb",
+  "pageId": "91eb1cb6-b8ef-80d8-8007-bfd3c3dddd22",
+  "positionData": [
+    {
+      "x": 1948,
+      "y": 1542,
+      "width": 39.73333740234375,
+      "height": 14,
+      "x1": 0,
+      "y1": -1,
+      "x2": 39.73333740234375,
+      "y2": 13,
+      "fontStyle": "normal",
+      "textTransform": "capitalize",
+      "fontSize": "10px",
+      "fontWeight": "400",
+      "textDecoration": "none",
+      "letterSpacing": "normal",
+      "fills": [
+        {
+          "fillColor": "#000000",
+          "fillOpacity": 1
+        }
+      ],
+      "direction": "rtl",
+      "fontFamily": "\"sourcesanspro\"",
+      "text": "messages"
+    }
+  ],
+  "strokes": [],
+  "blocked": false,
+  "fills": []
+}

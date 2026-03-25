@@ -1,0 +1,81 @@
+{
+  "id": "616d077f-fecc-8001-8007-c46a44d4440a",
+  "name": "Ellipse",
+  "type": "circle",
+  "x": 1750,
+  "y": 1417,
+  "width": 21,
+  "height": 21,
+  "rotation": 0,
+  "selrect": {
+    "x": 1750,
+    "y": 1417,
+    "width": 21,
+    "height": 21,
+    "x1": 1750,
+    "y1": 1417,
+    "x2": 1771,
+    "y2": 1438
+  },
+  "points": [
+    {
+      "x": 1750,
+      "y": 1417
+    },
+    {
+      "x": 1771,
+      "y": 1417
+    },
+    {
+      "x": 1771,
+      "y": 1438
+    },
+    {
+      "x": 1750,
+      "y": 1438
+    }
+  ],
+  "transform": {
+    "a": 1.0,
+    "b": 0.0,
+    "c": 0.0,
+    "d": 1.0,
+    "e": 0.0,
+    "f": 0.0
+  },
+  "transformInverse": {
+    "a": 1.0,
+    "b": 0.0,
+    "c": 0.0,
+    "d": 1.0,
+    "e": 0.0,
+    "f": 0.0
+  },
+  "parentId": "616d077f-fecc-8001-8007-c46a44d44400",
+  "frameId": "616d077f-fecc-8001-8007-c46a44d44400",
+  "flipX": null,
+  "flipY": null,
+  "growType": "fixed",
+  "hideInViewer": false,
+  "proportionLock": true,
+  "pageId": "91eb1cb6-b8ef-80d8-8007-bfd3c3dddd22",
+  "constraintsV": "top",
+  "interactions": [
+    {
+      "eventType": "click",
+      "actionType": "navigate",
+      "destination": "616d077f-fecc-8001-8007-c46a44d443af",
+      "positionRelativeTo": "616d077f-fecc-8001-8007-c46999ebe8de",
+      "preserveScroll": false
+    }
+  ],
+  "constraintsH": "left",
+  "strokes": [],
+  "proportion": 1,
+  "fills": [
+    {
+      "fillColor": "#000000",
+      "fillOpacity": 1
+    }
+  ]
+}

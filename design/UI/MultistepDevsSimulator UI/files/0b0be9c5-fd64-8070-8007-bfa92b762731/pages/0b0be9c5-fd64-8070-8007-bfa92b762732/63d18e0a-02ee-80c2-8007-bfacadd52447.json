@@ -1,0 +1,86 @@
+{
+  "id": "63d18e0a-02ee-80c2-8007-bfacadd52447",
+  "name": "Atomic",
+  "type": "frame",
+  "x": 282,
+  "y": -579,
+  "width": 158,
+  "height": 121,
+  "rotation": 0,
+  "selrect": {
+    "x": 282,
+    "y": -579,
+    "width": 158,
+    "height": 121,
+    "x1": 282,
+    "y1": -579,
+    "x2": 440,
+    "y2": -458
+  },
+  "points": [
+    {
+      "x": 282,
+      "y": -579
+    },
+    {
+      "x": 440,
+      "y": -579
+    },
+    {
+      "x": 440,
+      "y": -458
+    },
+    {
+      "x": 282,
+      "y": -458
+    }
+  ],
+  "transform": {
+    "a": 1.0,
+    "b": 0.0,
+    "c": 0.0,
+    "d": 1.0,
+    "e": 0.0,
+    "f": 0.0
+  },
+  "transformInverse": {
+    "a": 1.0,
+    "b": 0.0,
+    "c": 0.0,
+    "d": 1.0,
+    "e": 0.0,
+    "f": 0.0
+  },
+  "parentId": "63d18e0a-02ee-80c2-8007-bfc56303d300",
+  "frameId": "63d18e0a-02ee-80c2-8007-bfc56303d300",
+  "flipX": null,
+  "flipY": null,
+  "hideFillOnExport": false,
+  "hideInViewer": true,
+  "variantName": "Value 1",
+  "r2": 0,
+  "componentRoot": true,
+  "showContent": true,
+  "proportionLock": false,
+  "pageId": "0b0be9c5-fd64-8070-8007-bfa92b762732",
+  "r3": 0,
+  "interactions": [],
+  "r1": 0,
+  "componentId": "63d18e0a-02ee-80c2-8007-bfacadd64e24",
+  "strokes": [],
+  "mainInstance": true,
+  "blocked": false,
+  "proportion": 1,
+  "r4": 0,
+  "fills": [],
+  "variantId": "63d18e0a-02ee-80c2-8007-bfc56303d300",
+  "componentFile": "0b0be9c5-fd64-8070-8007-bfa92b762731",
+  "shapes": [
+    "63d18e0a-02ee-80c2-8007-bfa95c13e2bb",
+    "63d18e0a-02ee-80c2-8007-bfaa6ce2dcf0",
+    "63d18e0a-02ee-80c2-8007-bfb3ee719d03",
+    "63d18e0a-02ee-80c2-8007-bfb1fba49caf",
+    "91eb1cb6-b8ef-80d8-8007-bfdb203dd2f6",
+    "63d18e0a-02ee-80c2-8007-bfb3c05f30d6"
+  ]
+}

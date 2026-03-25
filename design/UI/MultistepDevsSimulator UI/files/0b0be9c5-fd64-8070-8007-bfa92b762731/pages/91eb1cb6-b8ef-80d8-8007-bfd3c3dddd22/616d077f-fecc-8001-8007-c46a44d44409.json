@@ -1,0 +1,77 @@
+{
+  "id": "616d077f-fecc-8001-8007-c46a44d44409",
+  "name": "Group",
+  "type": "frame",
+  "x": 1755,
+  "y": 1269,
+  "width": 124,
+  "height": 109,
+  "rotation": 0,
+  "selrect": {
+    "x": 1755,
+    "y": 1269,
+    "width": 124,
+    "height": 109,
+    "x1": 1755,
+    "y1": 1269,
+    "x2": 1879,
+    "y2": 1378
+  },
+  "points": [
+    {
+      "x": 1755,
+      "y": 1269
+    },
+    {
+      "x": 1879,
+      "y": 1269
+    },
+    {
+      "x": 1879,
+      "y": 1378
+    },
+    {
+      "x": 1755,
+      "y": 1378
+    }
+  ],
+  "transform": {
+    "a": 1.0,
+    "b": 0.0,
+    "c": 0.0,
+    "d": 1.0,
+    "e": 0.0,
+    "f": 0.0
+  },
+  "transformInverse": {
+    "a": 1.0,
+    "b": 0.0,
+    "c": 0.0,
+    "d": 1.0,
+    "e": 0.0,
+    "f": 0.0
+  },
+  "parentId": "616d077f-fecc-8001-8007-c46a44d44400",
+  "frameId": "616d077f-fecc-8001-8007-c46a44d44400",
+  "flipX": null,
+  "flipY": null,
+  "hideFillOnExport": false,
+  "hideInViewer": true,
+  "r2": 0,
+  "componentRoot": true,
+  "shapeRef": "91eb1cb6-b8ef-80d8-8007-bfe75ff02c45",
+  "showContent": true,
+  "proportionLock": false,
+  "pageId": "91eb1cb6-b8ef-80d8-8007-bfd3c3dddd22",
+  "r3": 0,
+  "r1": 0,
+  "componentId": "91eb1cb6-b8ef-80d8-8007-bfe75ff1b6b8",
+  "strokes": [],
+  "proportion": 1,
+  "r4": 0,
+  "fills": [],
+  "componentFile": "0b0be9c5-fd64-8070-8007-bfa92b762731",
+  "shapes": [
+    "616d077f-fecc-8001-8007-c46a44d4bcf2"
+  ]
+}

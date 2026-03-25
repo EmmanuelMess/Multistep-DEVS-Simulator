@@ -1,0 +1,87 @@
+{
+  "id": "616d077f-fecc-8001-8007-c46a44d44405",
+  "name": "Atomic",
+  "type": "frame",
+  "x": 1507,
+  "y": 1241,
+  "width": 158,
+  "height": 121,
+  "rotation": 0,
+  "selrect": {
+    "x": 1507,
+    "y": 1241,
+    "width": 158,
+    "height": 121,
+    "x1": 1507,
+    "y1": 1241,
+    "x2": 1665,
+    "y2": 1362
+  },
+  "points": [
+    {
+      "x": 1507,
+      "y": 1241
+    },
+    {
+      "x": 1665,
+      "y": 1241
+    },
+    {
+      "x": 1665,
+      "y": 1362
+    },
+    {
+      "x": 1507,
+      "y": 1362
+    }
+  ],
+  "transform": {
+    "a": 1.0,
+    "b": 0.0,
+    "c": 0.0,
+    "d": 1.0,
+    "e": 0.0,
+    "f": 0.0
+  },
+  "transformInverse": {
+    "a": 1.0,
+    "b": 0.0,
+    "c": 0.0,
+    "d": 1.0,
+    "e": 0.0,
+    "f": 0.0
+  },
+  "parentId": "616d077f-fecc-8001-8007-c46a44d44400",
+  "frameId": "616d077f-fecc-8001-8007-c46a44d44400",
+  "flipX": null,
+  "flipY": null,
+  "hideFillOnExport": false,
+  "hideInViewer": true,
+  "touched": [
+    "modifiable-group"
+  ],
+  "r2": 0,
+  "componentRoot": true,
+  "shapeRef": "63d18e0a-02ee-80c2-8007-bfacadd52447",
+  "showContent": true,
+  "proportionLock": false,
+  "pageId": "91eb1cb6-b8ef-80d8-8007-bfd3c3dddd22",
+  "r3": 0,
+  "interactions": [],
+  "r1": 0,
+  "componentId": "63d18e0a-02ee-80c2-8007-bfacadd64e24",
+  "strokes": [],
+  "blocked": false,
+  "proportion": 1,
+  "r4": 0,
+  "fills": [],
+  "componentFile": "0b0be9c5-fd64-8070-8007-bfa92b762731",
+  "shapes": [
+    "616d077f-fecc-8001-8007-c46a44d4440b",
+    "616d077f-fecc-8001-8007-c46a44d4440c",
+    "616d077f-fecc-8001-8007-c46a44d4440d",
+    "616d077f-fecc-8001-8007-c46a44d4440e",
+    "616d077f-fecc-8001-8007-c46a44d4440f",
+    "616d077f-fecc-8001-8007-c46a44d44410"
+  ]
+}

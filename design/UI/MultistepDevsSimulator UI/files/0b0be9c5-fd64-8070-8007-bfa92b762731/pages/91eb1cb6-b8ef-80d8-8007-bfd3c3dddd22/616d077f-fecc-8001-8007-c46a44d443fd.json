@@ -1,0 +1,78 @@
+{
+  "id": "616d077f-fecc-8001-8007-c46a44d443fd",
+  "name": "Group",
+  "type": "group",
+  "x": 362,
+  "y": 1129,
+  "width": 31,
+  "height": 28,
+  "rotation": 0,
+  "selrect": {
+    "x": 362,
+    "y": 1129,
+    "width": 31,
+    "height": 28,
+    "x1": 362,
+    "y1": 1129,
+    "x2": 393,
+    "y2": 1157
+  },
+  "points": [
+    {
+      "x": 362,
+      "y": 1129
+    },
+    {
+      "x": 393,
+      "y": 1129
+    },
+    {
+      "x": 393,
+      "y": 1157
+    },
+    {
+      "x": 362,
+      "y": 1157
+    }
+  ],
+  "transform": {
+    "a": 1.0,
+    "b": 0.0,
+    "c": 0.0,
+    "d": 1.0,
+    "e": 0.0,
+    "f": 0.0
+  },
+  "transformInverse": {
+    "a": 1.0,
+    "b": 0.0,
+    "c": 0.0,
+    "d": 1.0,
+    "e": 0.0,
+    "f": 0.0
+  },
+  "parentId": "616d077f-fecc-8001-8007-c46a44d443b7",
+  "frameId": "616d077f-fecc-8001-8007-c46a44d443b7",
+  "flipX": false,
+  "flipY": false,
+  "index": 1,
+  "proportionLock": false,
+  "pageId": "91eb1cb6-b8ef-80d8-8007-bfd3c3dddd22",
+  "interactions": [
+    {
+      "eventType": "click",
+      "actionType": "navigate",
+      "destination": "91eb1cb6-b8ef-80d8-8007-bfe091bb6c45",
+      "positionRelativeTo": "91eb1cb6-b8ef-80d8-8007-bfdfb7d7df66",
+      "preserveScroll": false
+    }
+  ],
+  "strokes": [],
+  "blocked": false,
+  "proportion": 1,
+  "fills": [],
+  "shapes": [
+    "616d077f-fecc-8001-8007-c46a44d443fe",
+    "616d077f-fecc-8001-8007-c46a44d443ff"
+  ]
+}
