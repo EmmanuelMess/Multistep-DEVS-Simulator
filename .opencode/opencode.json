@@ -1,6 +1,6 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "plugin": ["@ramtinj95/opencode-tokenscope"],
+  "plugin": ["@ramtinj95/opencode-tokenscope", "opencode-claude-bridge"],
   "permission": {
     "bash": {
       "*": "ask",
@@ -10,3 +10,4 @@
     }
   }
 }
+
