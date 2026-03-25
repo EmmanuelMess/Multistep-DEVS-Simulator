@@ -7,8 +7,9 @@ from src.devs.Atomic import Atomic
 from src.devs.IdGenerator import generateId
 from src.devs.Types import Port, Time
 from src.examples.company.Messages import (
-    Product, DemandProduct, OfferProduct, AssignEmployee,
-    HaltProduction, Improvement, RequestEmployee, Employee,
+    Product, DemandProduct, OfferProduct, AssignEmployee, UnassignEmployee,
+    ForceHaltProduction, UndoHaltProduction, Improvement,
+    RequestEmployee, Employee,
 )
 
 
@@ -17,8 +18,10 @@ class Manufacturing(Atomic):
     DEMAND_PRODUCT_IN = (0, DemandProduct)
     PRODUCT_IN = (1, Product)
     ASSIGN_EMPLOYEE_IN = (2, AssignEmployee)
-    HALT_PRODUCTION_IN = (3, HaltProduction)
-    IMPROVEMENT_IN = (4, Improvement)
+    FORCE_HALT_PRODUCTION_IN = (3, ForceHaltProduction)
+    UNDO_HALT_PRODUCTION_IN = (4, UndoHaltProduction)
+    IMPROVEMENT_IN = (5, Improvement)
+    UNASSIGN_EMPLOYEE_IN = (6, UnassignEmployee)
 
     # --- Output ports ---
     PRODUCT_OUT = (0, Product)
@@ -32,14 +35,16 @@ class Manufacturing(Atomic):
     def __init__(
         self,
         bill_of_materials: Dict[str, Dict],
+        product_costs: Dict[str, float],
     ):
         """
         bill_of_materials: {product_type: {"inputs": {input_type: qty}, "base_time": float}}
-        product_config: {product_type: {"role": "primary"|"intermediate"|"final", "cost": float}}
+        product_costs: {product_type: cost} — used when offering products
         """
         super().__init__(generateId("manufacturing"))
 
         self.bill_of_materials = bill_of_materials
+        self.product_costs = product_costs
 
         # Inventory of finished / intermediate goods
         self.inventory: Dict[str, List[Product]] = {}
@@ -73,8 +78,9 @@ class Manufacturing(Atomic):
         # Register ports
         self.set_inports([
             self.DEMAND_PRODUCT_IN, self.PRODUCT_IN,
-            self.ASSIGN_EMPLOYEE_IN, self.HALT_PRODUCTION_IN,
-            self.IMPROVEMENT_IN,
+            self.ASSIGN_EMPLOYEE_IN, self.FORCE_HALT_PRODUCTION_IN,
+            self.UNDO_HALT_PRODUCTION_IN, self.IMPROVEMENT_IN,
+            self.UNASSIGN_EMPLOYEE_IN,
         ])
         self.set_outports([
             self.PRODUCT_OUT, self.DEMAND_PRODUCT_OUT,
@@ -175,8 +181,9 @@ class Manufacturing(Atomic):
         offered: Set[str] = set()
         for product_type, products in self.inventory.items():
             if products and self.demand.get(product_type, 0) <= 0 and product_type not in offered:
+                cost = self.product_costs.get(product_type, 0.0)
                 self._out_offer.append(
-                    OfferProduct(generateId("offer"), product_type)
+                    OfferProduct(generateId("offer"), product_type, cost)
                 )
                 offered.add(product_type)
 
@@ -226,21 +233,34 @@ class Manufacturing(Atomic):
             elif port == self.ASSIGN_EMPLOYEE_IN:
                 for assign in cast(List[AssignEmployee], bag):
                     self.assigned_employees.append(assign.employee)
-                    if self.halted:
-                        self.halted = False
-                        print(f"[MFG] {self.id} Resuming production")
                     print(f"[INPUT] {self.id} Received {assign}")
 
-            elif port == self.HALT_PRODUCTION_IN:
-                for halt in cast(List[HaltProduction], bag):
+            elif port == self.UNASSIGN_EMPLOYEE_IN:
+                for unassign in cast(List[UnassignEmployee], bag):
+                    # Return employee to Administration's available pool
+                    self.assigned_employees = [
+                        e for e in self.assigned_employees
+                        if e.id != unassign.employee.id
+                    ]
+                    self.busy_employees = [
+                        e for e in self.busy_employees
+                        if e.id != unassign.employee.id
+                    ]
+                    print(f"[INPUT] {self.id} Received {unassign}")
+
+            elif port == self.FORCE_HALT_PRODUCTION_IN:
+                for halt in cast(List[ForceHaltProduction], bag):
                     self.halted = True
-                    # Employees taken back by Admin
-                    self.assigned_employees.clear()
-                    self.busy_employees.clear()
                     if self.producing:
                         print(f"[MFG] {self.id} Production of '{self.producing}' interrupted")
                         self.producing = None
                     print(f"[INPUT] {self.id} Received {halt}")
+
+            elif port == self.UNDO_HALT_PRODUCTION_IN:
+                for undo in cast(List[UndoHaltProduction], bag):
+                    self.halted = False
+                    print(f"[MFG] {self.id} Resuming production")
+                    print(f"[INPUT] {self.id} Received {undo}")
 
             elif port == self.IMPROVEMENT_IN:
                 for imp in cast(List[Improvement], bag):
@@ -270,7 +290,7 @@ class Manufacturing(Atomic):
         if self._out_request_emp:
             result[self.REQUEST_EMPLOYEE_OUT] = deepcopy(self._out_request_emp)
 
-        for _, messages in result:
+        for _, messages in result.items():
             print(f"[OUTPUT] {self.id} Sent {messages}")
         return result
 

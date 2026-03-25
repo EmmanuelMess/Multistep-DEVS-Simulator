@@ -75,8 +75,10 @@ tracking of improvements.
 of this file.
 - Halt production of the company if there is nothing that can be produced that creates profits: for example
 if there is no demand and an excess of inventory (offerings not sold)
+- Provide a showcase of all the functionality, as part of both the timestamped and random inputs mechanisms
 
 ## Math 
 
 - It must be provable that there is no way to generate an infinite loop in the simulation such that
 time stays still ($\delta t = 0$) but the same event occurs twice.
+

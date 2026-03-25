@@ -5,8 +5,8 @@ from src.devs.Atomic import Atomic
 from src.devs.IdGenerator import generateId
 from src.devs.Types import Port, Time
 from src.examples.company.Messages import (
-    AssignEmployee, StartImprovements, Improvement,
-    RequestEmployee, ImprovementsCost, Employee,
+    AssignEmployee, UnassignEmployee, StartImprovements, Improvement,
+    RequestEmployee, ImprovementsCost, InformImprovementFinished, Employee,
 )
 
 
@@ -14,7 +14,8 @@ class RAndD(Atomic):
     """
     R&D atomic model.  Receives StartImprovements from Administration,
     requests an employee, works for improvement_duration, then sends
-    an Improvement to Manufacturing and ImprovementsCost to Administration.
+    an Improvement to Manufacturing, ImprovementsCost to Administration,
+    and InformImprovementFinished to Administration.
     """
 
     # Phases
@@ -22,16 +23,18 @@ class RAndD(Atomic):
     EMIT_COST = "emit_cost"        # emitting ImprovementsCost + RequestEmployee
     WAITING = "waiting"            # waiting for employee assignment
     WORKING = "working"            # producing improvement
-    EMIT_RESULT = "emit_result"    # emitting Improvement result
+    EMIT_RESULT = "emit_result"    # emitting Improvement + InformImprovementFinished
 
     # --- Input ports ---
     ASSIGN_EMPLOYEE_IN = (0, AssignEmployee)
     START_IMPROVEMENTS_IN = (1, StartImprovements)
+    UNASSIGN_EMPLOYEE_IN = (2, UnassignEmployee)
 
     # --- Output ports ---
     IMPROVEMENT_OUT = (0, Improvement)
     REQUEST_EMPLOYEE_OUT = (1, RequestEmployee)
     IMPROVEMENTS_COST_OUT = (2, ImprovementsCost)
+    INFORM_IMPROVEMENT_FINISHED_OUT = (3, InformImprovementFinished)
 
     PROCESSING_DELAY = 2.0
 
@@ -54,19 +57,27 @@ class RAndD(Atomic):
         self._out_improvement: List[Improvement] = []
         self._out_request_emp: List[RequestEmployee] = []
         self._out_cost: List[ImprovementsCost] = []
+        self._out_inform_finished: List[InformImprovementFinished] = []
 
         # Queued improvement requests (if one arrives while busy)
         self._queued_improvements: List[str] = []
 
         # Register ports
-        self.set_inports([self.ASSIGN_EMPLOYEE_IN, self.START_IMPROVEMENTS_IN])
-        self.set_outports([self.IMPROVEMENT_OUT, self.REQUEST_EMPLOYEE_OUT, self.IMPROVEMENTS_COST_OUT])
+        self.set_inports([
+            self.ASSIGN_EMPLOYEE_IN, self.START_IMPROVEMENTS_IN,
+            self.UNASSIGN_EMPLOYEE_IN,
+        ])
+        self.set_outports([
+            self.IMPROVEMENT_OUT, self.REQUEST_EMPLOYEE_OUT,
+            self.IMPROVEMENTS_COST_OUT, self.INFORM_IMPROVEMENT_FINISHED_OUT,
+        ])
 
     # ------------------------------------------------------------------
     def _clear_buffers(self):
         self._out_improvement.clear()
         self._out_request_emp.clear()
         self._out_cost.clear()
+        self._out_inform_finished.clear()
 
     def _start_next_queued(self):
         """If there's a queued improvement, begin it."""
@@ -98,7 +109,7 @@ class RAndD(Atomic):
                 print(f"[R&D] {self.id} Waiting for employee")
 
         elif self.phase == self.WORKING:
-            # Work complete — prepare improvement for emission
+            # Work complete — prepare improvement and finished notification
             if self.current_improvement is None:
                 print(f"Error: {self.current_improvement} is None")
                 exit(1)
@@ -108,6 +119,12 @@ class RAndD(Atomic):
                     generateId("improvement"),
                     self.current_improvement,
                     self.efficiency_gain,
+                )
+            )
+            self._out_inform_finished.append(
+                InformImprovementFinished(
+                    generateId("inform_finished"),
+                    self.current_improvement,
                 )
             )
             self.phase = self.EMIT_RESULT
@@ -150,6 +167,14 @@ class RAndD(Atomic):
                         print(f"[R&D] {self.id} Employee arrived, working on "
                               f"'{self.current_improvement}'")
 
+            elif port == self.UNASSIGN_EMPLOYEE_IN:
+                for unassign in cast(List[UnassignEmployee], bag):
+                    self.assigned_employees = [
+                        e for e in self.assigned_employees
+                        if e.id != unassign.employee.id
+                    ]
+                    print(f"[INPUT] {self.id} Received {unassign}")
+
     @override
     def output(self) -> Dict[Port, List[Any]]:
         result: Dict[Port, List[Any]] = {}
@@ -159,8 +184,10 @@ class RAndD(Atomic):
             result[self.REQUEST_EMPLOYEE_OUT] = deepcopy(self._out_request_emp)
         if self._out_cost:
             result[self.IMPROVEMENTS_COST_OUT] = deepcopy(self._out_cost)
+        if self._out_inform_finished:
+            result[self.INFORM_IMPROVEMENT_FINISHED_OUT] = deepcopy(self._out_inform_finished)
 
-        for _, messages in result:
+        for _, messages in result.items():
             print(f"[OUTPUT] {self.id} Sent {messages}")
         return result
 

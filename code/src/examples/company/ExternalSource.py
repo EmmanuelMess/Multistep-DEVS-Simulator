@@ -6,7 +6,7 @@ from src.devs.IdGenerator import generateId
 from src.devs.Types import Port, Time
 from src.examples.company.Messages import (
     Capital, Payment, EmployeeOffering, EmployeeResignation,
-    DemandProduct, Product,
+    DemandProduct, Product, OfferProduct,
 )
 
 
@@ -28,14 +28,23 @@ class ExternalSource(Atomic):
     EMPLOYEE_RESIGNATION_OUT = (3, EmployeeResignation)
     DEMAND_PRODUCT_OUT = (4, DemandProduct)
     PRODUCT_OUT = (5, Product)
+    OFFER_PRODUCT_OUT = (6, OfferProduct)
 
-    def __init__(self, events: Dict[Time, Tuple[Port, Any]]):
+    def __init__(self, events: Dict[Time, List[Tuple[Port, Any]]]):
         """
-        events: Dict of {Time: (port, message)}, need not be sorted.
+        events: Dict of {Time: [(port, message), ...]}, need not be sorted.
+        Multiple events at the same timestamp are supported.
         """
         super().__init__(generateId("external_source"))
 
-        self.events: List[Tuple[Time, Tuple[Port, Any]]] = sorted(events.items())
+        # Flatten into sorted list of (time, (port, msg))
+        flat: List[Tuple[Time, Tuple[Port, Any]]] = []
+        for t, event_list in events.items():
+            for event in event_list:
+                flat.append((t, event))
+        flat.sort(key=lambda e: e[0])
+
+        self.events = flat
         self.next_index: int = 0
         self.output_buffer: Dict[Port, List[Any]] = {}
         self._next_fire_time: Time = 0.0
@@ -45,7 +54,7 @@ class ExternalSource(Atomic):
         self.set_outports([
             self.CAPITAL_OUT, self.PAYMENT_OUT, self.EMPLOYEE_OFFERING_OUT,
             self.EMPLOYEE_RESIGNATION_OUT, self.DEMAND_PRODUCT_OUT,
-            self.PRODUCT_OUT,
+            self.PRODUCT_OUT, self.OFFER_PRODUCT_OUT,
         ])
 
     @override
@@ -69,7 +78,7 @@ class ExternalSource(Atomic):
     @override
     def output(self) -> Dict[Port, List[Any]]:
         result = deepcopy(self.output_buffer) if self.output_buffer else {}
-        for _, messages in result:
+        for _, messages in result.items():
             print(f"[OUTSIDE-INPUT] {self.id} Sent {messages}")
         return result
 

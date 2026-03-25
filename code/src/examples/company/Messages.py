@@ -19,6 +19,7 @@ class DemandProduct:
 class OfferProduct:
     id: Id
     product_type: str
+    cost: float
 
 
 @dataclass
@@ -68,7 +69,18 @@ class AssignEmployee:
 
 
 @dataclass
-class HaltProduction:
+class UnassignEmployee:
+    id: Id
+    employee: Employee
+
+
+@dataclass
+class ForceHaltProduction:
+    id: Id
+
+
+@dataclass
+class UndoHaltProduction:
     id: Id
 
 
@@ -95,3 +107,9 @@ class Improvement:
 class ImprovementsCost:
     id: Id
     cost: float
+
+
+@dataclass
+class InformImprovementFinished:
+    id: Id
+    product_type: str
