@@ -1,10 +1,10 @@
-from deal import post
 import math
 from typing import Dict, List, Any, Tuple
 
 from deal import pre, ensure
 
 from src.devs.Atomic import Atomic
+from src.devs.AtomicGroups import AtomicGroups
 from src.devs.Constants import MAX_ATOMICS
 from src.devs.Types import Id, Port, Time
 
@@ -14,8 +14,14 @@ class AtomicGraph:
         self.models: Dict[Id, Atomic] = {}
         self._connections: Dict[Tuple[Id, Port], List[Tuple[Id, Port]]] = {}
 
+        self._groups = AtomicGroups()
+
         # Input cache to deal with multiple inputs to the same model
         self.models_input_cache: Dict[Id, Dict[Port, List[Any]]] = {}
+
+    @property
+    def groups(self) -> AtomicGroups:
+        return self._groups
 
     @pre(lambda self, model: model.id not in self.models.keys())
     @ensure(lambda self, model, result: len(self.models) <= MAX_ATOMICS)
