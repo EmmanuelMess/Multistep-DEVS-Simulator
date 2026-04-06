@@ -247,90 +247,68 @@ def build_graph(events: Dict[Time, List[Tuple[Port, Any]]]) -> Tuple[AtomicGraph
         bill_of_materials=BILL_OF_MATERIALS,
         product_costs=PRODUCT_COSTS,
     )
-    rd = RAndD(
+    rnd = RAndD(
         improvement_duration=10.0,
         efficiency_gain=0.1,
         improvement_cost=20.0,
     )
     admin = Administration(
         mfg_id=manufacturing.id,
-        rnd_id=rd.id,
+        rnd_id=rnd.id,
         producible_products=PRODUCIBLE_PRODUCTS,
         max_employees=10,
     )
     source = ExternalSource(events)
 
-    graph.add(manufacturing)
-    graph.add(rd)
-    graph.add(admin)
-    graph.add(source)
+    graph.add_all([manufacturing, rnd, admin, source])
 
     # --- Internal connections (per DEVS diagram) ---
 
     # Administration -> Manufacturing:
     #   { ForceHaltProduction, UndoHaltProduction,
     #     AssignEmployee, UnassignEmployee }
-    graph.connect(admin.id, admin.ASSIGN_EMPLOYEE_MFG_OUT,
-                  manufacturing.id, manufacturing.ASSIGN_EMPLOYEE_IN)
-    graph.connect(admin.id, admin.UNASSIGN_EMPLOYEE_MFG_OUT,
-                  manufacturing.id, manufacturing.UNASSIGN_EMPLOYEE_IN)
-    graph.connect(admin.id, admin.FORCE_HALT_PRODUCTION_OUT,
-                  manufacturing.id, manufacturing.FORCE_HALT_PRODUCTION_IN)
-    graph.connect(admin.id, admin.UNDO_HALT_PRODUCTION_OUT,
-                  manufacturing.id, manufacturing.UNDO_HALT_PRODUCTION_IN)
+    graph.connect(admin.id, admin.ASSIGN_EMPLOYEE_MFG_OUT, manufacturing.id, manufacturing.ASSIGN_EMPLOYEE_IN)
+    graph.connect(admin.id, admin.UNASSIGN_EMPLOYEE_MFG_OUT, manufacturing.id, manufacturing.UNASSIGN_EMPLOYEE_IN)
+    graph.connect(admin.id, admin.FORCE_HALT_PRODUCTION_OUT, manufacturing.id, manufacturing.FORCE_HALT_PRODUCTION_IN)
+    graph.connect(admin.id, admin.UNDO_HALT_PRODUCTION_OUT, manufacturing.id, manufacturing.UNDO_HALT_PRODUCTION_IN)
 
     # Manufacturing -> Administration:
     #   { RequestEmployee, DemandProduct(Product(i)) }
-    graph.connect(manufacturing.id, manufacturing.REQUEST_EMPLOYEE_OUT,
-                  admin.id, admin.REQUEST_EMPLOYEE_IN)
-    graph.connect(manufacturing.id, manufacturing.DEMAND_PRODUCT_OUT,
-                  admin.id, admin.DEMAND_PRODUCT_IN)
+    graph.connect(manufacturing.id, manufacturing.REQUEST_EMPLOYEE_OUT, admin.id, admin.REQUEST_EMPLOYEE_IN)
+    graph.connect(manufacturing.id, manufacturing.DEMAND_PRODUCT_OUT, admin.id, admin.DEMAND_PRODUCT_IN)
 
     # Administration -> R&D:
     #   { AssignEmployee, UnassignEmployee, StartImprovements }
-    graph.connect(admin.id, admin.ASSIGN_EMPLOYEE_RD_OUT,
-                  rd.id, rd.ASSIGN_EMPLOYEE_IN)
-    graph.connect(admin.id, admin.UNASSIGN_EMPLOYEE_RD_OUT,
-                  rd.id, rd.UNASSIGN_EMPLOYEE_IN)
-    graph.connect(admin.id, admin.START_IMPROVEMENTS_OUT,
-                  rd.id, rd.START_IMPROVEMENTS_IN)
+    graph.connect(admin.id, admin.ASSIGN_EMPLOYEE_RD_OUT, rnd.id, rnd.ASSIGN_EMPLOYEE_IN)
+    graph.connect(admin.id, admin.UNASSIGN_EMPLOYEE_RD_OUT, rnd.id, rnd.UNASSIGN_EMPLOYEE_IN)
+    graph.connect(admin.id, admin.START_IMPROVEMENTS_OUT, rnd.id, rnd.START_IMPROVEMENTS_IN)
 
     # R&D -> Administration:
     #   { RequestEmployee, ImprovementsCost, InformImprovementFinished }
-    graph.connect(rd.id, rd.REQUEST_EMPLOYEE_OUT,
-                  admin.id, admin.REQUEST_EMPLOYEE_IN)
-    graph.connect(rd.id, rd.IMPROVEMENTS_COST_OUT,
-                  admin.id, admin.IMPROVEMENTS_COST_IN)
-    graph.connect(rd.id, rd.INFORM_IMPROVEMENT_FINISHED_OUT,
-                  admin.id, admin.INFORM_IMPROVEMENT_FINISHED_IN)
+    graph.connect(rnd.id, rnd.REQUEST_EMPLOYEE_OUT, admin.id, admin.REQUEST_EMPLOYEE_IN)
+    graph.connect(rnd.id, rnd.IMPROVEMENTS_COST_OUT, admin.id, admin.IMPROVEMENTS_COST_IN)
+    graph.connect(rnd.id, rnd.INFORM_IMPROVEMENT_FINISHED_OUT, admin.id, admin.INFORM_IMPROVEMENT_FINISHED_IN)
 
     # R&D -> Manufacturing: { Improvement }
-    graph.connect(rd.id, rd.IMPROVEMENT_OUT,
+    graph.connect(rnd.id, rnd.IMPROVEMENT_OUT,
                   manufacturing.id, manufacturing.IMPROVEMENT_IN)
 
     # --- External connections (ExternalSource -> Company inputs) ---
 
     # Capital, Payment -> Administration
-    graph.connect(source.id, source.CAPITAL_OUT,
-                  admin.id, admin.CAPITAL_IN)
-    graph.connect(source.id, source.PAYMENT_OUT,
-                  admin.id, admin.PAYMENT_IN)
+    graph.connect(source.id, source.CAPITAL_OUT, admin.id, admin.CAPITAL_IN)
+    graph.connect(source.id, source.PAYMENT_OUT, admin.id, admin.PAYMENT_IN)
 
     # EmployeeOffering, EmployeeResignation, OfferProduct -> Administration
-    graph.connect(source.id, source.EMPLOYEE_OFFERING_OUT,
-                  admin.id, admin.EMPLOYEE_OFFERING_IN)
-    graph.connect(source.id, source.EMPLOYEE_RESIGNATION_OUT,
-                  admin.id, admin.EMPLOYEE_RESIGNATION_IN)
-    graph.connect(source.id, source.OFFER_PRODUCT_OUT,
-                  admin.id, admin.OFFER_PRODUCT_IN)
+    graph.connect(source.id, source.EMPLOYEE_OFFERING_OUT, admin.id, admin.EMPLOYEE_OFFERING_IN)
+    graph.connect(source.id, source.EMPLOYEE_RESIGNATION_OUT, admin.id, admin.EMPLOYEE_RESIGNATION_IN)
+    graph.connect(source.id, source.OFFER_PRODUCT_OUT, admin.id, admin.OFFER_PRODUCT_IN)
 
     # DemandProduct -> Manufacturing
-    graph.connect(source.id, source.DEMAND_PRODUCT_OUT,
-                  manufacturing.id, manufacturing.DEMAND_PRODUCT_IN)
+    graph.connect(source.id, source.DEMAND_PRODUCT_OUT, manufacturing.id, manufacturing.DEMAND_PRODUCT_IN)
 
     # Product (raw materials) -> Manufacturing
-    graph.connect(source.id, source.PRODUCT_OUT,
-                  manufacturing.id, manufacturing.PRODUCT_IN)
+    graph.connect(source.id, source.PRODUCT_OUT, manufacturing.id, manufacturing.PRODUCT_IN)
 
     # Company outputs (Product, OfferProduct from Manufacturing;
     # LookingForEmployee, FireEmployee, DemandProduct, Payment

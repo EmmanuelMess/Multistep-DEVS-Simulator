@@ -48,7 +48,7 @@ class Simulator:
                     print(f"Error: model {model_id} is being run twice at instant {current_time}")
                     exit(1)
 
-                model = self.graph.models[model_id]
+                model = self.graph._models[model_id]
 
                 is_imminent = model_id in imminent_model_ids
                 has_input = model_id in with_input_model_ids
