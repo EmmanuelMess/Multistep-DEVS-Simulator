@@ -2,6 +2,8 @@
 
 Structure:
 - Source code is in `code`
+  - Simulator is in `simulator` in python
+  - UI is in `nodes-gui` in C
 - Design documents are in `design`
   - DEVS diagrams for examples are in `design/DEVS diagrams`
   - Class diagrams are in `design/class diagrams`

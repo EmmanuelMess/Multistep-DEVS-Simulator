@@ -17,10 +17,10 @@ class AtomicGroups:
     def __len__(self) -> int:
         return self._groups.__len__()
 
-    @ensure(lambda self, group_id, _, result: group_id in self._groups.keys())
-    def add_group(self, group_id: Id, name: str) -> AtomicGroup:
-        self._groups[group_id] = AtomicGroup(name)
-        return self._groups[group_id]
+    @ensure(lambda self, group, result: group.id in self._groups.keys())
+    def add_group(self, group: AtomicGroup) -> AtomicGroup:
+        self._groups[group.id] = group
+        return self._groups[group.id]
 
     @pre(lambda self, group_id: group_id in self._groups.keys())
     def find_group(self, group_id: Id) -> AtomicGroup:

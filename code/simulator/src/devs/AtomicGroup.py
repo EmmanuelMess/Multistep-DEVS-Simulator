@@ -6,7 +6,8 @@ from src.devs.Types import Id
 
 
 class AtomicGroup:
-    def __init__(self, name: str):
+    def __init__(self, id: Id, name: str):
+        self._id = id
         self._name: str = name
         self._atomics: Set[Id] = set()
 
@@ -15,6 +16,10 @@ class AtomicGroup:
 
     def __len__(self) -> int:
         return self._atomics.__len__()
+
+    @property
+    def id(self):
+        return self._id
 
     @property
     def name(self):
