@@ -3,6 +3,7 @@ from typing import Dict, List, Any
 from hypothesis import given, reproduce_failure
 import hypothesis.strategies as st
 
+from src.devs.AtomicGroup import AtomicGroup
 from src.devs import Constants
 from src.devs.Atomic import Atomic
 from src.devs.AtomicGraph import AtomicGraph
@@ -38,7 +39,8 @@ def test_singles_in_groups(n):
 
     for i in range(n):
         atomic = _SingleStepAtomic()
-        group = graph.groups.add_group(generateId("group"), f"group {i}")
+        group = AtomicGroup(generateId("group"), f"group {i}")
+        graph.groups.add_group(group)
 
         graph.add(atomic)
         group.add(atomic.id)
