@@ -12,7 +12,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     defaults:
       run:
-        working-directory: ./code
+        working-directory: ./code/simulator
     strategy:
       fail-fast: false
       matrix:

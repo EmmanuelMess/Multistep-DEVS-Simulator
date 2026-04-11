@@ -4,6 +4,7 @@
 #include <raymath.h>
 #include <rlgl.h>
 #include <stddef.h>
+#include <stdio.h>
 
 const Color DOTS_COLOR = (Color) { .r = 0xB0, .g = 0xB0, .b = 0xB0, .a = 0xFF };
 const Color INPUT_PORT_COLOR = (Color) { .r = 0x15, .g = 0x20, .b = 0xA0, .a = 0xFF };
@@ -153,14 +154,19 @@ static void draw_board(const struct GlobalState* state, Font font) {
 	}
 }
 
-void run_window(int width, int height, struct GlobalState* state) {
+void run_window(const char* resources_directory, int width, int height, struct GlobalState* state) {
 	SetTraceLogLevel(LOG_DEBUG);
 	SetConfigFlags(FLAG_MSAA_4X_HINT);
 	SetTargetFPS(30);
 
 	InitWindow(width, height, "raylib example - basic window");
 
-	Font ubuntu_font = LoadFontEx("./resources/library/Ubuntu-M.ttf", 48, NULL, 0);
+#define DIRECTORY_CHAR_LEN (500)
+	char font_directory[DIRECTORY_CHAR_LEN];
+	snprintf(font_directory, DIRECTORY_CHAR_LEN-1, "%s%s", resources_directory, "/library/Ubuntu-M.ttf");
+#undef DIRECTORY_CHAR_LEN
+
+	Font ubuntu_font = LoadFontEx(font_directory, 48, NULL, 0);
 	GenTextureMipmaps(&ubuntu_font.texture);
 	SetTextureFilter(ubuntu_font.texture, TEXTURE_FILTER_TRILINEAR);
 

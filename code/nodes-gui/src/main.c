@@ -47,7 +47,7 @@ int main(void)
 		.atomics = free_atomics
 	};
 
-	run_window(WIDTH, HEIGHT, &state);
+	run_window("./lib/resources", WIDTH, HEIGHT, &state);
 
 
 	return 0;

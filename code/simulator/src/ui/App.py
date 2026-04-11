@@ -14,7 +14,7 @@ class App:
 
     def run(self):
         state = self.global_state
-        nodes_library.run_window(800, 450, state)
+        nodes_library.run_window("./nodes-gui/lib/resources",800, 450, state)
 
     def _parse_graph(self, graph: AtomicGraph) -> GlobalState:
         groups: List[GroupBlock] = []

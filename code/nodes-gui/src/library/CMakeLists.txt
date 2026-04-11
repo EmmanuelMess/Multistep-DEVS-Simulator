@@ -15,3 +15,14 @@ add_custom_command(TARGET nodes_library POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     ${CMAKE_CURRENT_SOURCE_DIR}/resources
     ${CMAKE_CURRENT_BINARY_DIR}/resources)
+
+
+set(CMAKE_LIBRARY_DIR "${CMAKE_SOURCE_DIR}/lib")
+add_custom_command(TARGET nodes_library POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    ${CMAKE_CURRENT_SOURCE_DIR}/resources
+    ${CMAKE_LIBRARY_DIR}/resources)
+add_custom_command(TARGET nodes_library POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy
+    ${CMAKE_CURRENT_BINARY_DIR}/libnodes_library.so
+    ${CMAKE_LIBRARY_DIR}/libnodes_library.so)

@@ -43,4 +43,4 @@ struct GlobalState {
 	struct AtomicBlock* atomics;
 };
 
-void run_window(int width, int height, struct GlobalState* state);
+void run_window(const char* resources_directory, int width, int height, struct GlobalState* state);
