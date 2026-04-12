@@ -1,12 +1,5 @@
 #pragma once
 
-struct ClipArea {
-	float x;                // Rectangle top-left corner position x
-	float y;                // Rectangle top-left corner position y
-	float width;            // Rectangle width
-	float height;           // Rectangle height
-};
-
 // Vector2, 2 components
 struct Position {
 	float x;                // Vector x component
@@ -24,7 +17,9 @@ struct AtomicBlock {
 	struct Port* input_ports;
 	int amount_output_ports;
 	struct Port* output_ports;
-	struct ClipArea rect;
+	struct Position position;
+	float width;
+	float height;
 };
 
 struct GroupBlock {
@@ -32,7 +27,9 @@ struct GroupBlock {
 	char* name;
 	int amount_atomics;
 	struct AtomicBlock* atomics;
-	struct ClipArea rect;
+	struct Position position;
+	float width;
+	float height;
 };
 
 struct GlobalState {

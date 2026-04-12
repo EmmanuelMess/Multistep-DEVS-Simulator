@@ -1,3 +1,5 @@
+#include <stddef.h>
+
 #include "library/window.h"
 
 int main(void)
@@ -5,37 +7,40 @@ int main(void)
 	const int WIDTH = 800;
 	const int HEIGHT = 450;
 	struct Port input_ports[] = {
-		(struct Port) { .name = "Messages" },
-		(struct Port) { .name = "Objects" },
+		(struct Port) { .name = "Messages1" },
+		(struct Port) { .name = "Objects1" },
 	};
 
 	struct Port output_ports[] = {
-		(struct Port) { .name = "Messages" },
-		(struct Port) { .name = "Objects" },
+		(struct Port) { .name = "Messages2" },
+		(struct Port) { .name = "Objects2" },
 	};
 
 	struct AtomicBlock group_atomics[] = {
 		(struct AtomicBlock) {
-			.id = 0, .name = "Atomic",
+			.id = 0, .name = "Atomic1",
 			.amount_input_ports = 2, .input_ports = input_ports,
 			.amount_output_ports = 2, .output_ports = output_ports,
-			.rect = (struct ClipArea) {.x = 0, .y = 0, .width = 200, .height = 300 },
+			.position = (struct Position) { .x = 0, .y = 0 },
+			.width = 200, .height = 300,
 		},
 	};
 
 	struct GroupBlock group_blocks[] = {
 		(struct GroupBlock) {
-			.id = 0, .name = "Group", .amount_atomics = 1, .atomics = group_atomics,
-			.rect = (struct ClipArea) {.x = -250, .y = 0, .width = 200, .height = 300 },
+			.id = 0, .name = "Group1", .amount_atomics = 1, .atomics = group_atomics,
+			.position = (struct Position) { .x = -100, .y = -100 },
+			.width = 200, .height = 300,
 		}
 	};
 
 	struct AtomicBlock free_atomics[] = {
 		(struct AtomicBlock) {
-			.id = 0, .name = "Atomic",
+			.id = 0, .name = "Atomic2",
 			.amount_input_ports = 2, .input_ports = input_ports,
 			.amount_output_ports = 2, .output_ports = output_ports,
-			.rect = (struct ClipArea) {.x = -50, .y = 0, .width = 200, .height = 300 },
+			.position = (struct Position) {.x = 100, .y = 100 },
+			.width = 200, .height = 300,
 		},
 	};
 

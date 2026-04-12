@@ -29,7 +29,9 @@ class AtomicBlock(ctypes.Structure):
         ("input_ports", ctypes.POINTER(Port)),
         ("amount_output_ports", ctypes.c_int),
         ("output_ports", ctypes.POINTER(Port)),
-        ("rect", ClipArea),
+        ("position", Position),
+        ("width", ctypes.c_float),
+        ("height", ctypes.c_float),
     ]
 
 class GroupBlock(ctypes.Structure):
@@ -38,7 +40,9 @@ class GroupBlock(ctypes.Structure):
         ("name", ctypes.c_char_p),
         ("amount_atomics", ctypes.c_int),
         ("atomics", ctypes.POINTER(AtomicBlock)),
-        ("rect", ClipArea),
+        ("position", Position),
+        ("width", ctypes.c_float),
+        ("height", ctypes.c_float),
     ]
 
 Block = Union[AtomicBlock, GroupBlock]
