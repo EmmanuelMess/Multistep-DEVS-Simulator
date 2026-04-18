@@ -9,9 +9,19 @@
 
 const Color DOTS_COLOR = (Color) { .r = 0xB0, .g = 0xB0, .b = 0xB0, .a = 0xFF };
 const Color INPUT_PORT_COLOR = (Color) { .r = 0x15, .g = 0x20, .b = 0xA0, .a = 0xFF };
+const Color DEACTIVATED_CONNECTION_COLOR = BLACK;
+const Color ACTIVATED_CONNECTION_COLOR = RED;
 
-static Vector2 project_position(Vector3 position) {
-	return (Vector2) {.x = position.x, .y = position.y };
+const float PORT_CIRCLE_SIZE = 5.0f;  // [px]
+const float ATOMIC_LINE_POSITION = 50.0f;  // [px]
+const float PORT_TEXT_SIZE = 16.0f;  // [px]
+
+static Vector2 convert_position(struct Position position) {
+	return (Vector2) { .x = position.x, .y = position.y };
+}
+
+static struct Position convert_vector2(Vector2 position) {
+	return (struct Position) { .x = position.x, .y = position.y };
 }
 
 #if DEBUG
@@ -23,59 +33,122 @@ static void log_matrix(Matrix matrix) {
 }
 #endif
 
-static void update_atomic(Matrix screen_to_atomic, struct AtomicBlock* state) {
+// ----------------------------- UPDATE TEMP DATA ---------------------------
+
+static void update_data_port(Font font, Matrix world_to_port, struct Port* port) {
+	const Vector2 draw_port_text_size = MeasureTextEx(font, port->name, PORT_TEXT_SIZE, 0);
+	const float port_position_y = draw_port_text_size.y / 2.0f;
+
+	port->position_global = convert_vector2(Vector2Transform((Vector2) {.x = 0, .y = 0}, world_to_port));
+	port->position_global.y += port_position_y;
+}
+
+static void update_data_atomic(Font font, Matrix world_to_atomic, struct AtomicBlock* atomic) {
+	atomic->position_global = (struct Position) { .x = world_to_atomic.m12, .y = world_to_atomic.m13 };
+
+	for (int i = 0; i < atomic->amount_input_ports; i++) {
+		struct Port* port = atomic->input_ports[i];
+		const float port_position_y = ATOMIC_LINE_POSITION + (float) (i+1) * 20;
+		const Matrix world_to_port = MatrixMultiply(MatrixTranslate(0, port_position_y, 0.0f), world_to_atomic);
+
+		update_data_port(font, world_to_port, port);
+	}
+
+	for (int i = 0; i < atomic->amount_output_ports; i++) {
+		struct Port* port = atomic->output_ports[i];
+		const float port_position_y = ATOMIC_LINE_POSITION + (float) (i+1) * 20;
+		const Matrix world_to_port = MatrixMultiply(MatrixTranslate(atomic->width, port_position_y, 0.0f), world_to_atomic);
+
+		update_data_port(font, world_to_port, port);
+	}
+}
+
+static void update_data_group(Font font, Matrix world_to_group, struct GroupBlock* block) {
+	block->position_global = (struct Position) { .x = world_to_group.m12, .y = world_to_group.m13 };
+
+	for (int i = 0; i < block->amount_atomics; i++) {
+		struct AtomicBlock* atomic = block->atomics[i];
+		const Matrix world_to_atomic = MatrixMultiply(MatrixTranslate(atomic->position.x, atomic->position.y, 0.0f), world_to_group);
+
+		update_data_atomic(font, world_to_atomic, atomic);
+	}
+}
+
+static void update_data_ui(Font font, Matrix world_to_board, struct GlobalState* state) {
+	for (int i = 0; i < state->amount_groups; i++) {
+		struct GroupBlock* group = state->groups[i];
+		const Matrix world_to_group = MatrixMultiply(MatrixTranslate(group->position.x, group->position.y, 0.0f), world_to_board);
+
+		update_data_group(font, world_to_group, group);
+	}
+
+	for (int i = 0; i < state->amount_atomics; i++) {
+		struct AtomicBlock* atomic = state->atomics[i];
+		const Matrix world_to_atomic = MatrixMultiply(MatrixTranslate(atomic->position.x, atomic->position.y, 0.0f), world_to_board);
+
+		update_data_atomic(font, world_to_atomic, atomic);
+	}
+}
+
+// ----------------------------- UPDATE ---------------------------
+
+static void update_atomic(struct GlobalState* state, Matrix screen_to_atomic, struct AtomicBlock* atomic) {
 	if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
 		const Vector2 post_mouse_position = GetMousePosition();
-		const Vector2 prev_mouse_position = Vector2Subtract(post_mouse_position, GetMouseDelta());
-		const Vector2 atomic_prev_mouse_position = project_position(
-			Vector3Transform((Vector3){ prev_mouse_position.x, prev_mouse_position.y, 0 }, screen_to_atomic));
 
-		const bool click_inside = CheckCollisionPointRec(atomic_prev_mouse_position,
-			(Rectangle) { .x = 0, .y = 0, .width = state->width, .height = state->height });
-		if (click_inside) {
-			const Vector2 parent_post_mouse_position = project_position(
-				Vector3Transform((Vector3){ post_mouse_position.x, post_mouse_position.y, 0 }, screen_to_atomic));
-			const Vector2 parent_mouse_delta = Vector2Subtract(parent_post_mouse_position, atomic_prev_mouse_position);
+		{  // Move atomic
+			const Vector2 prev_mouse_position = Vector2Subtract(post_mouse_position, GetMouseDelta());
+			const Vector2 atomic_prev_mouse_position =
+				Vector2Transform((Vector2){ prev_mouse_position.x, prev_mouse_position.y }, screen_to_atomic);
 
-			state->position = (struct Position) {
-				.x = state->position.x + parent_mouse_delta.x, .y = state->position.y + parent_mouse_delta.y
-			};
+			const bool click_inside = CheckCollisionPointRec(atomic_prev_mouse_position,
+				(Rectangle) { .x = 0, .y = 0, .width = atomic->width, .height = atomic->height });
+			if (click_inside) {
+				const Vector2 parent_post_mouse_position =
+					Vector2Transform((Vector2){ post_mouse_position.x, post_mouse_position.y }, screen_to_atomic);
+				const Vector2 parent_mouse_delta = Vector2Subtract(parent_post_mouse_position, atomic_prev_mouse_position);
 
+				atomic->position = (struct Position) {
+					.x = atomic->position.x + parent_mouse_delta.x, .y = atomic->position.y + parent_mouse_delta.y
+				};
+			}
 		}
 	}
 }
 
-static void update_group(Matrix screen_to_group, struct GroupBlock* state) {
-	for (int i = 0; i < state->amount_atomics; i++) {
-		struct AtomicBlock* atomic = &state->atomics[i];
+static void update_group(struct GlobalState* state, Matrix screen_to_group, struct GroupBlock* block) {
+	for (int i = 0; i < block->amount_atomics; i++) {
+		struct AtomicBlock* atomic = block->atomics[i];
 		const Matrix screen_to_atomic = MatrixMultiply(MatrixTranslate(-atomic->position.x, -atomic->position.y, 0.0f), screen_to_group);
 
-		update_atomic(screen_to_atomic, atomic);
+		update_atomic(state, screen_to_atomic, atomic);
 	}
 }
 
-static void update_ui(Matrix screen_to_board, struct GlobalState* state) {
+static void update_ui(struct GlobalState* state, Matrix screen_to_board) {
 	for (int i = 0; i < state->amount_groups; i++) {
-		struct GroupBlock* group = &state->groups[i];
+		struct GroupBlock* group = state->groups[i];
 		const Matrix screen_to_group = MatrixMultiply(MatrixTranslate(-group->position.x, -group->position.y, 0.0f), screen_to_board);
 
-		update_group(screen_to_group, group);
+		update_group(state, screen_to_group, group);
 	}
 
 	for (int i = 0; i < state->amount_atomics; i++) {
-		struct AtomicBlock* atomic = &state->atomics[i];
+		struct AtomicBlock* atomic = state->atomics[i];
 		const Matrix screen_to_atomic = MatrixMultiply(MatrixTranslate(-atomic->position.x,- atomic->position.y, 0.0f), screen_to_board);
 
-		update_atomic(screen_to_atomic, atomic);
+		update_atomic(state, screen_to_atomic, atomic);
 	}
 }
+
+// -------------------------------------- DRAW ------------------------------
 
 static void draw_input_port(Font font, struct Port* port, float port_text_size) {
 	const Vector2 draw_port_text_size = MeasureTextEx(font, port->name, port_text_size, 0);
 
 	Vector2 position = { .x = 0, .y = draw_port_text_size.y / 2 };
-	DrawCircleLinesV(position, 5, BLACK);
-	DrawCircleV(position, 5, INPUT_PORT_COLOR);
+	DrawCircleLinesV(position, PORT_CIRCLE_SIZE, BLACK);
+	DrawCircleV(position, PORT_CIRCLE_SIZE, INPUT_PORT_COLOR);
 
 	const Vector2 text_position = (Vector2) {.x = 10, .y = 0 };
 	DrawTextEx(font, port->name, text_position, port_text_size, 0, BLACK);
@@ -85,8 +158,8 @@ static void draw_output_port(Font font, struct Port* port, float port_text_size)
 	const Vector2 draw_port_text_size = MeasureTextEx(font, port->name, port_text_size, 0);
 
 	Vector2 position = { .x = 0, .y = draw_port_text_size.y / 2 };
-	DrawCircleLinesV(position, 5, BLACK);
-	DrawCircleV(position, 5, INPUT_PORT_COLOR);
+	DrawCircleLinesV(position, PORT_CIRCLE_SIZE, BLACK);
+	DrawCircleV(position, PORT_CIRCLE_SIZE, INPUT_PORT_COLOR);
 
 	const Vector2 text_position = (Vector2) {.x = -draw_port_text_size.x - 10, .y = 0 };
 	DrawTextEx(font, port->name, text_position, port_text_size, 0, BLACK);
@@ -100,35 +173,32 @@ static void draw_atomic(Font font, struct AtomicBlock* block) {
 	Rectangle rect = {.x = 0, .y = 0, .width = block->width, .height = block->height};
 	rect.height += 20.0f * (float) block->amount_input_ports;
 
-	const float line_y = 50.0f;
-
 	const float text_size = 20.0f;
-	const float port_text_size = 16.0f;
 	const Vector2 drawn_text_size = MeasureTextEx(font, block->name, text_size, 0);
 	const float text_x = 10.0f;
-	const float text_y = line_y / 2 - drawn_text_size.y / 2;
+	const float text_y = ATOMIC_LINE_POSITION / 2 - drawn_text_size.y / 2;
 
 	DrawRectangleRoundedLinesEx(rect, 0.05f, 10, 2, GRAY);
 	DrawRectangleRounded(rect, 0.05f, 10, LIGHTGRAY);
-	DrawLineEx((Vector2) { .x = 0, .y = line_y}, (Vector2) { .x = rect.width, .y = line_y }, 1, GRAY);
+	DrawLineEx((Vector2) { .x = 0, .y = ATOMIC_LINE_POSITION}, (Vector2) { .x = rect.width, .y = ATOMIC_LINE_POSITION }, 1, GRAY);
 	DrawTextEx(font, block->name, (Vector2) { .x = text_x, .y = text_y }, text_size, 2, BLACK);
 
 	for (int i = 0; i < block->amount_input_ports; i++) {
-		struct Port* port = &block->input_ports[i];
+		struct Port* port = block->input_ports[i];
 		rlPushMatrix();
-		rlTranslatef(0, line_y + (float) (i+1) * 20, 0);
+		rlTranslatef(0, ATOMIC_LINE_POSITION + (float) (i+1) * 20, 0);
 		{
-			draw_input_port(font, port, port_text_size);
+			draw_input_port(font, port, PORT_TEXT_SIZE);
 		}
 		rlPopMatrix();
 	}
 
 	for (int i = 0; i < block->amount_output_ports; i++) {
-		struct Port* port = &block->output_ports[i];
+		struct Port* port = block->output_ports[i];
 		rlPushMatrix();
-		rlTranslatef(rect.width, line_y + (float) (i+1) * 20, 0);
+		rlTranslatef(rect.width, ATOMIC_LINE_POSITION + (float) (i+1) * 20, 0);
 		{
-			draw_output_port(font, port, port_text_size);
+			draw_output_port(font, port, PORT_TEXT_SIZE);
 		}
 		rlPopMatrix();
 	}
@@ -136,7 +206,7 @@ static void draw_atomic(Font font, struct AtomicBlock* block) {
 
 static void draw_group(Font font, struct GroupBlock* block) {
 	for (int i = 0; i < block->amount_atomics; i++) {
-		struct AtomicBlock* atomic = &block->atomics[i];
+		struct AtomicBlock* atomic = block->atomics[i];
 
 		rlPushMatrix();
 		rlTranslatef(atomic->position.x, atomic->position.y, 0.0f);
@@ -157,7 +227,7 @@ static void draw_board_grid(int x_size, int y_size) {
 
 static void draw_board(const struct GlobalState* state, Font font) {
 	for (int i = 0; i < state->amount_groups; i++) {
-		struct GroupBlock* group = &state->groups[i];
+		struct GroupBlock* group = state->groups[i];
 		rlPushMatrix();
 		rlTranslatef(group->position.x, group->position.y, 0.0f);
 		{
@@ -171,13 +241,26 @@ static void draw_board(const struct GlobalState* state, Font font) {
 	}
 
 	for (int i = 0; i < state->amount_atomics; i++) {
-		struct AtomicBlock* atomic = &state->atomics[i];
+		struct AtomicBlock* atomic = state->atomics[i];
 		rlPushMatrix();
 		rlTranslatef(atomic->position.x, atomic->position.y, 0.0f);
 		{
 			draw_atomic(font, atomic);
 		}
 		rlPopMatrix();
+	}
+}
+
+// ------------------------------------- DRAW CONNECTIONS -----------------------------
+static void draw_connections(const struct GlobalState* state) {
+	for (int i = 0; i < state->amount_connections; ++i) {
+		struct Connection* connection = state->connections[i];
+		struct Port* port_input = dictionary_get(state->ports, connection->input_id);
+		struct Port* port_output = dictionary_get(state->ports, connection->output_id);
+
+		const Color color = connection->activated? ACTIVATED_CONNECTION_COLOR:DEACTIVATED_CONNECTION_COLOR;
+
+		DrawLineBezier(convert_position(port_input->position_global), convert_position(port_output->position_global), 2, color);
 	}
 }
 
@@ -198,7 +281,7 @@ void run_window(const char* resources_directory, int width, int height, struct G
 	SetTextureFilter(ubuntu_font.texture, TEXTURE_FILTER_TRILINEAR);
 
 	Camera2D camera = { 0 };
-	camera.offset = (Vector2) { .x = width / 2, .y = height / 2 };
+	camera.offset = (Vector2) { .x = width / 2.0f, .y = height / 2.0f };
 	camera.target = (Vector2) { .x = 0, .y = 0 };
 	camera.zoom = 1.0f;
 
@@ -232,9 +315,12 @@ void run_window(const char* resources_directory, int width, int height, struct G
 		}
 
 		{
+			const Matrix world_to_board = MatrixTranslate(-state->position.x, -state->position.y, 0.0f);
 			const Matrix screen_to_world = MatrixInvert(GetCameraMatrix2D(camera));
-			const Matrix screen_to_board = MatrixMultiply(MatrixTranslate(-state->position.x, -state->position.y, 0.0f), screen_to_world);
-			update_ui(screen_to_board, state);
+			const Matrix screen_to_board = MatrixMultiply(world_to_board, screen_to_world);
+			update_ui(state, screen_to_board);
+
+			update_data_ui(ubuntu_font, MatrixTranslate(state->position.x, state->position.y, 0.0f), state);
 		}
 
 		BeginDrawing();
@@ -254,8 +340,9 @@ void run_window(const char* resources_directory, int width, int height, struct G
 					draw_board(state, ubuntu_font);
 				}
 				rlPopMatrix();
-			}
 
+				draw_connections(state);
+			}
 			EndMode2D();
 		}
 		EndDrawing();

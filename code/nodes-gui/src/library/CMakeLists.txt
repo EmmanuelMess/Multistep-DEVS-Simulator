@@ -1,5 +1,7 @@
 add_library(nodes_library SHARED
-    window.c)
+    window.c
+    dictionary.c
+    blocks.c)
 add_library(nodes_gui::nodes_library ALIAS nodes_library)
 set_property(TARGET nodes_library PROPERTY POSITION_INDEPENDENT_CODE ON)
 set_property(TARGET raylib PROPERTY POSITION_INDEPENDENT_CODE ON)
