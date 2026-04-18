@@ -1,5 +1,7 @@
 #include "library/blocks.h"
 
+#include "library/dictionary.h"
+
 #include <stdlib.h>
 
 struct Port * blocks_create_port(char *id, char *name) {

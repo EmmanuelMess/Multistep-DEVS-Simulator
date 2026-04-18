@@ -5,6 +5,8 @@
 #include <rlgl.h>
 #include <stdio.h>
 
+#include "library/dictionary.h"
+
 #define DEBUG false
 
 const Color DOTS_COLOR = (Color) { .r = 0xB0, .g = 0xB0, .b = 0xB0, .a = 0xFF };
