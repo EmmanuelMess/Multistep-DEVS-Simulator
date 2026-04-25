@@ -34,13 +34,13 @@ jobs:
         shell: bash
 
       - name: Configure CMake
-        working-directory: ./nodes-gui
+        working-directory: ./code/nodes-gui
         # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
         # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
         run: cmake -S . -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Release
   
       - name: Build C
-        working-directory: ./nodes-gui
+        working-directory: ./code/nodes-gui
         # Build your program with the given configuration
         run: cmake --build ${{github.workspace}}/build --config Release
         
@@ -54,19 +54,19 @@ jobs:
           python -m pip install --upgrade pip
           
       - name: Install deps
-        working-directory: ./simulator
+        working-directory: ./code/simulator
         run: |
           python -m pip install -r requirements.txt -r requirements-dev.txt
           
       - name: Test with pytest
-        working-directory: ./simulator
+        working-directory: ./code/simulator
         run: python -m pytest tests/ --doctest-modules --junitxml=junit/test-results-${{ matrix.version }}.xml
 
       - name: Upload pytest test results
         uses: actions/upload-artifact@v4
         with:
           name: pytest-results-${{ matrix.version }}
-          working-directory: ./simulator
+          working-directory: ./code/simulator
           path: junit/test-results-${{ matrix.version }}.xml
         # Use always() to always run this step to publish test results when there are test failures
         if: ${{ always() }}
