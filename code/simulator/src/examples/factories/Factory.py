@@ -3,19 +3,20 @@ from typing import List, Any, Dict, cast, override
 
 from src.devs.Atomic import Atomic
 from src.devs.IdGenerator import generateId
-from src.devs.Types import Port
+from src.devs.Port import Port
 from src.examples.factories.CapitalProvider import Capital
 from src.examples.factories.Product import Product
 from src.examples.factories.ProductMarket import SellOrder, MoneyTransfer
 
 
 class Factory(Atomic):
-    CAPITAL_INPUT_PORT = (0, Capital)
-    MONEY_TRANSFER_INPUT_PORT = (1, MoneyTransfer)
-    ITEM_OUTPUT_PORT = (0, SellOrder)
-
     def __init__(self):
         super().__init__(generateId("factory"))
+
+        self.CAPITAL_INPUT_PORT = Port(generateId("factory_port"), self.id, Capital)
+        self.MONEY_TRANSFER_INPUT_PORT =  Port(generateId("factory_port"), self.id, MoneyTransfer)
+        self.ITEM_OUTPUT_PORT =  Port(generateId("factory_port"), self.id, SellOrder)
+
         self.totalCapital: float = 0
         self.itemCost = 5
         self.period = 1

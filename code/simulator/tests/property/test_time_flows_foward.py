@@ -3,6 +3,7 @@ import hypothesis.strategies as st
 
 import math
 
+from src.devs.Port import Port
 from src.devs import Constants
 from src.devs.AtomicGraph import AtomicGraph
 from src.devs.IdGenerator import generateId
@@ -10,7 +11,7 @@ from typing import Dict, List, Any
 
 from src.devs.Atomic import Atomic
 from src.devs.Simulator import Simulator
-from src.devs.Types import Time, Port
+from src.devs.Types import Time
 
 def create_atomic(t: float)-> Atomic:
     class _SingleStepAtomic(Atomic):

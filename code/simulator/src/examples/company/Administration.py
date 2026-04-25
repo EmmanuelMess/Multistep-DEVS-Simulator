@@ -1,9 +1,10 @@
 from copy import deepcopy
 from typing import List, Any, Dict, cast, override
 
+from src.devs.Port import Port
 from src.devs.Atomic import Atomic
 from src.devs.IdGenerator import generateId
-from src.devs.Types import Port, Time
+from src.devs.Types import Time
 from src.examples.company.Messages import (
     Capital, Payment, EmployeeOffering, EmployeeResignation,
     RequestEmployee, ImprovementsCost, AssignEmployee, UnassignEmployee,
@@ -14,30 +15,6 @@ from src.examples.company.Messages import (
 
 
 class Administration(Atomic):
-    # --- Input ports ---
-    CAPITAL_IN = (0, Capital)
-    PAYMENT_IN = (1, Payment)
-    EMPLOYEE_OFFERING_IN = (2, EmployeeOffering)
-    EMPLOYEE_RESIGNATION_IN = (3, EmployeeResignation)
-    REQUEST_EMPLOYEE_IN = (4, RequestEmployee)
-    IMPROVEMENTS_COST_IN = (5, ImprovementsCost)
-    DEMAND_PRODUCT_IN = (6, DemandProduct)
-    OFFER_PRODUCT_IN = (7, OfferProduct)
-    INFORM_IMPROVEMENT_FINISHED_IN = (8, InformImprovementFinished)
-
-    # --- Output ports ---
-    ASSIGN_EMPLOYEE_MFG_OUT = (0, AssignEmployee)
-    ASSIGN_EMPLOYEE_RD_OUT = (1, AssignEmployee)
-    UNASSIGN_EMPLOYEE_MFG_OUT = (2, UnassignEmployee)
-    UNASSIGN_EMPLOYEE_RD_OUT = (3, UnassignEmployee)
-    FORCE_HALT_PRODUCTION_OUT = (4, ForceHaltProduction)
-    UNDO_HALT_PRODUCTION_OUT = (5, UndoHaltProduction)
-    START_IMPROVEMENTS_OUT = (6, StartImprovements)
-    LOOKING_FOR_EMPLOYEE_OUT = (7, LookingForEmployee)
-    FIRE_EMPLOYEE_OUT = (8, FireEmployee)
-    DEMAND_PRODUCT_OUT = (9, DemandProduct)
-    PAYMENT_OUT = (10, Payment)
-
     REVIEW_PERIOD = 5
     RESPONSE_DELAY = 1.5
     IDLE_THRESHOLD_REVIEWS = 3
@@ -51,6 +28,31 @@ class Administration(Atomic):
         max_employees: int = 10,
     ):
         super().__init__(generateId("administration"))
+
+        # --- Input ports ---
+        self.CAPITAL_IN = Port(generateId("administration_port"), self.id, Capital)
+        self.PAYMENT_IN = Port(generateId("administration_port"), self.id, Payment)
+        self.EMPLOYEE_OFFERING_IN = Port(generateId("administration_port"), self.id, EmployeeOffering)
+        self.EMPLOYEE_RESIGNATION_IN = Port(generateId("administration_port"), self.id, EmployeeResignation)
+        self.REQUEST_EMPLOYEE_IN = Port(generateId("administration_port"), self.id, RequestEmployee)
+        self.IMPROVEMENTS_COST_IN = Port(generateId("administration_port"), self.id, ImprovementsCost)
+        self.DEMAND_PRODUCT_IN = Port(generateId("administration_port"), self.id, DemandProduct)
+        self.OFFER_PRODUCT_IN = Port(generateId("administration_port"), self.id, OfferProduct)
+        self.INFORM_IMPROVEMENT_FINISHED_IN = Port(generateId("administration_port"), self.id, InformImprovementFinished)
+
+        # --- Output ports ---
+        self.ASSIGN_EMPLOYEE_MFG_OUT = Port(generateId("administration_port"), self.id, AssignEmployee)
+        self.ASSIGN_EMPLOYEE_RD_OUT = Port(generateId("administration_port"), self.id, AssignEmployee)
+        self.UNASSIGN_EMPLOYEE_MFG_OUT = Port(generateId("administration_port"), self.id, UnassignEmployee)
+        self.UNASSIGN_EMPLOYEE_RD_OUT = Port(generateId("administration_port"), self.id, UnassignEmployee)
+        self.FORCE_HALT_PRODUCTION_OUT = Port(generateId("administration_port"), self.id, ForceHaltProduction)
+        self.UNDO_HALT_PRODUCTION_OUT = Port(generateId("administration_port"), self.id, UndoHaltProduction)
+        self.START_IMPROVEMENTS_OUT = Port(generateId("administration_port"), self.id, StartImprovements)
+        self.LOOKING_FOR_EMPLOYEE_OUT = Port(generateId("administration_port"), self.id, LookingForEmployee)
+        self.FIRE_EMPLOYEE_OUT = Port(generateId("administration_port"), self.id, FireEmployee)
+        self.DEMAND_PRODUCT_OUT = Port(generateId("administration_port"), self.id, DemandProduct)
+        self.PAYMENT_OUT = Port(generateId("administration_port"), self.id, Payment)
+
         self._mfg_id = mfg_id
         self._rnd_id = rnd_id
         self._producible_products = producible_products

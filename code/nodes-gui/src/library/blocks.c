@@ -2,6 +2,8 @@
 
 #include "library/dictionary.h"
 
+#include <stdio.h>
+
 #include <stdlib.h>
 
 struct Port * blocks_create_port(char *id, char *name) {
@@ -42,12 +44,15 @@ struct Connection * blocks_create_connection(char *input_id, char *output_id) {
 }
 
 struct GlobalState * create_global_state(struct Position position, int amount_groups, struct GroupBlock **group_blocks,
-	int amount_atomics, struct AtomicBlock **free_atomic_blocks, int amount_ports, struct Connection **connections) {
+	int amount_atomics, struct AtomicBlock **free_atomic_blocks, int amount_connections, struct Connection **connections) {
+	printf("%d groups, %d atomics, %d connections\n", amount_groups, amount_atomics, amount_connections);
+
 	struct Dictionary* ports = dictionary_create(); // [char* -> struct Port*]
 	for (int i = 0; i < amount_groups; ++i) {
-		struct GroupBlock* group_block = group_blocks[i];
-		for (int j = 0; j < group_block->amount_atomics; ++j) {
-			struct AtomicBlock* atomic = group_block->atomics[j];
+		struct GroupBlock* group = group_blocks[i];
+
+		for (int j = 0; j < group->amount_atomics; ++j) {
+			struct AtomicBlock* atomic = group->atomics[j];
 			for (int k = 0; k < atomic->amount_input_ports; ++k) {
 				struct Port* port = atomic->input_ports[k];
 				dictionary_set(ports, port->id, port);
@@ -73,6 +78,11 @@ struct GlobalState * create_global_state(struct Position position, int amount_gr
 		}
 	}
 
+	printf("Connections\n");
+	for (int i = 0; i < amount_connections; ++i) {
+		printf("%s to %s\n", connections[i]->input_id, connections[i]->output_id);
+	}
+
 	struct GlobalState* global_state = calloc(1, sizeof(struct GlobalState));
 	*global_state = (struct GlobalState) {
 		.position = position,
@@ -80,7 +90,7 @@ struct GlobalState * create_global_state(struct Position position, int amount_gr
 		.groups = group_blocks,
 		.amount_atomics = amount_atomics,
 		.atomics = free_atomic_blocks,
-		.amount_connections = amount_ports,
+		.amount_connections = amount_connections,
 		.connections = connections,
 		.ports = ports
 	};

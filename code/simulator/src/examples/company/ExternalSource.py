@@ -1,9 +1,10 @@
 from copy import deepcopy
-from typing import List, Any, Dict, Tuple, override
+from typing import List, Any, Dict, Tuple, override, Callable
 
+from src.devs.Port import Port
 from src.devs.Atomic import Atomic
 from src.devs.IdGenerator import generateId
-from src.devs.Types import Port, Time
+from src.devs.Types import Time
 from src.examples.company.Messages import (
     Capital, Payment, EmployeeOffering, EmployeeResignation,
     DemandProduct, Product, OfferProduct,
@@ -21,21 +22,23 @@ class ExternalSource(Atomic):
     (pre-generated from distributions) input modes.
     """
 
-    # All possible output ports — only those with events get connected
-    CAPITAL_OUT = (0, Capital)
-    PAYMENT_OUT = (1, Payment)
-    EMPLOYEE_OFFERING_OUT = (2, EmployeeOffering)
-    EMPLOYEE_RESIGNATION_OUT = (3, EmployeeResignation)
-    DEMAND_PRODUCT_OUT = (4, DemandProduct)
-    PRODUCT_OUT = (5, Product)
-    OFFER_PRODUCT_OUT = (6, OfferProduct)
-
-    def __init__(self, events: Dict[Time, List[Tuple[Port, Any]]]):
+    def __init__(self, generate_events: Callable[["ExternalSource"], Dict[Time, List[Tuple[Port, Any]]]]):
         """
         events: Dict of {Time: [(port, message), ...]}, need not be sorted.
         Multiple events at the same timestamp are supported.
         """
         super().__init__(generateId("external_source"))
+
+        # All possible output ports — only those with events get connected
+        self.CAPITAL_OUT = Port(generateId("external_source_port"), self.id, Capital)
+        self.PAYMENT_OUT = Port(generateId("external_source_port"), self.id, Payment)
+        self.EMPLOYEE_OFFERING_OUT = Port(generateId("external_source_port"), self.id, EmployeeOffering)
+        self.EMPLOYEE_RESIGNATION_OUT = Port(generateId("external_source_port"), self.id, EmployeeResignation)
+        self.DEMAND_PRODUCT_OUT = Port(generateId("external_source_port"), self.id, DemandProduct)
+        self.PRODUCT_OUT = Port(generateId("external_source_port"), self.id, Product)
+        self.OFFER_PRODUCT_OUT = Port(generateId("external_source_port"), self.id, OfferProduct)
+
+        events: Dict[Time, List[Tuple[Port, Any]]] = generate_events(self)
 
         # Flatten into sorted list of (time, (port, msg))
         flat: List[Tuple[Time, Tuple[Port, Any]]] = []

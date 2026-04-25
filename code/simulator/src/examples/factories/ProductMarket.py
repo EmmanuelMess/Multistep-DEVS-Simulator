@@ -1,17 +1,13 @@
 import sys
-from math import inf
-from copy import deepcopy
 from dataclasses import dataclass
-from enum import Enum
+from math import inf
 from typing import List, override, Union, Dict, Any, cast
-
-import deal
-from deal import inv
 
 from src.devs.Atomic import Atomic
 from src.devs.IdGenerator import generateId
-from src.devs.Types import Id, Port
-from src.examples.factories.CapitalProvider import Capital
+from src.devs.Port import Port
+from src.devs.Types import Id
+
 
 @dataclass
 class BuyOrder:
@@ -47,13 +43,14 @@ Transfer = Union[GoodsTransfer, MoneyTransfer]
 
 
 class ProductMarket(Atomic):
-    SELL_ORDER_INPUT_PORT = (0, SellOrder)
-    BUY_ORDER_INPUT_PORT = (1, BuyOrder)
-    GOODS_TRANSFER_OUTPUT_PORT = (0, GoodsTransfer)
-    MONEY_TRANSFER_OUTPUT_PORT = (1, MoneyTransfer)
-
     def __init__(self):
         super().__init__(generateId("product_market"))
+
+        self.SELL_ORDER_INPUT_PORT = Port(generateId("product_market_port"), self.id, SellOrder)
+        self.BUY_ORDER_INPUT_PORT = Port(generateId("product_market_port"), self.id, BuyOrder)
+        self.GOODS_TRANSFER_OUTPUT_PORT = Port(generateId("product_market_port"), self.id, GoodsTransfer)
+        self.MONEY_TRANSFER_OUTPUT_PORT = Port(generateId("product_market_port"), self.id, MoneyTransfer)
+
         self.buyOrders: List[BuyOrder] = []
         self.sellOrders: List[SellOrder] = []
 

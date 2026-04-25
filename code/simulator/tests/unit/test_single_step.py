@@ -1,13 +1,13 @@
 import math
 
+from src.devs.Port import Port
 from src.devs.AtomicGraph import AtomicGraph
 from src.devs.IdGenerator import generateId
 from typing import Dict, List, Any
 
 from src.devs.Atomic import Atomic
 from src.devs.Simulator import Simulator
-from src.devs.Types import Time, Port
-
+from src.devs.Types import Time
 
 class _SingleStepAtomic(Atomic):
     def __init__(self) -> None:

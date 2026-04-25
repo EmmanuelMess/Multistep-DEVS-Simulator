@@ -70,4 +70,4 @@ struct Connection* blocks_create_connection(char* input_id, char* output_id);
 struct GlobalState* create_global_state(struct Position position,
                                         int amount_groups, struct GroupBlock** group_blocks,
                                         int amount_atomics, struct AtomicBlock** free_atomic_blocks,
-                                        int amount_ports, struct Connection** connections);
+                                        int amount_connections, struct Connection** connections);

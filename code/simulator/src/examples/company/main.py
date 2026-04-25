@@ -2,12 +2,13 @@ import math
 import random
 import sys
 from collections import defaultdict
-from typing import List, Tuple, Any, Dict
+from typing import List, Tuple, Any, Dict, Callable
 
+from src.devs.Port import Port
 from src.devs.AtomicGraph import AtomicGraph
 from src.devs.IdGenerator import generateId
 from src.devs.Simulator import Simulator
-from src.devs.Types import Port, Time
+from src.devs.Types import Time
 from src.examples.company.Administration import Administration
 from src.examples.company.ExternalSource import ExternalSource
 from src.examples.company.Manufacturing import Manufacturing
@@ -46,7 +47,7 @@ PRODUCT_COSTS: Dict[str, float] = {
 # Event generators
 # ---------------------------------------------------------------------------
 
-def generate_scripted_events() -> Dict[Time, List[Tuple[Port, Any]]]:
+def generate_scripted_events(external_source: ExternalSource) -> Dict[Time, List[Tuple[Port, Any]]]:
     """Hand-crafted event list for a deterministic scenario.
 
     Exercises every message type and major state transition:
@@ -67,97 +68,93 @@ def generate_scripted_events() -> Dict[Time, List[Tuple[Port, Any]]]:
     employees: List[Employee] = []
 
     # t=1: Initial capital injection
-    events[1.0].append((ExternalSource.CAPITAL_OUT,
-                    Capital(generateId("capital"), 200.0)))
+    events[1.0].append((external_source.CAPITAL_OUT, Capital(generateId("capital"), 200.0)))
 
     # t=2,4: Employees arrive early
     for t in [2.0, 4.0]:
         employee = Employee(generateId("employee"))
-        events[t].append((ExternalSource.EMPLOYEE_OFFERING_OUT,
-                      EmployeeOffering(generateId("employee_offer"), employee)))
+        events[t].append((external_source.EMPLOYEE_OFFERING_OUT, EmployeeOffering(generateId("employee_offer"), employee)))
         employees.append(employee)
 
     # t=3: First demand for a widget
-    events[3.0].append((ExternalSource.DEMAND_PRODUCT_OUT,
-                    DemandProduct(generateId("demand"), "widget")))
+    events[3.0].append((external_source.DEMAND_PRODUCT_OUT, DemandProduct(generateId("demand"), "widget")))
 
     # t=5,6: Steel deliveries (2 needed per widget)
-    events[5.0].append((ExternalSource.PRODUCT_OUT,
+    events[5.0].append((external_source.PRODUCT_OUT,
                     Product(generateId("product"), "steel")))
-    events[6.0].append((ExternalSource.PRODUCT_OUT,
+    events[6.0].append((external_source.PRODUCT_OUT,
                     Product(generateId("product"), "steel")))
 
     # t=7: Payment from customer for the first widget (honor system)
-    events[7.0].append((ExternalSource.PAYMENT_OUT,
+    events[7.0].append((external_source.PAYMENT_OUT,
                     Payment(generateId("payment"), 12.0)))
 
     # t=8: Third employee arrives
     emp3 = Employee(generateId("employee"))
-    events[8.0].append((ExternalSource.EMPLOYEE_OFFERING_OUT,
+    events[8.0].append((external_source.EMPLOYEE_OFFERING_OUT,
                     EmployeeOffering(generateId("employee_offer"), emp3)))
     employees.append(emp3)
 
     # t=9,10: More demand + steel for a second widget
-    events[9.0].append((ExternalSource.DEMAND_PRODUCT_OUT,
+    events[9.0].append((external_source.DEMAND_PRODUCT_OUT,
                     DemandProduct(generateId("demand"), "widget")))
-    events[10.0].append((ExternalSource.PRODUCT_OUT,
+    events[10.0].append((external_source.PRODUCT_OUT,
                      Product(generateId("product"), "steel")))
-    events[10.5].append((ExternalSource.PRODUCT_OUT,
+    events[10.5].append((external_source.PRODUCT_OUT,
                      Product(generateId("product"), "steel")))
 
     # t=11: Payment for second widget
-    events[11.0].append((ExternalSource.PAYMENT_OUT,
+    events[11.0].append((external_source.PAYMENT_OUT,
                      Payment(generateId("payment"), 12.0)))
 
     # t=12: Outside offers steel to the company (Administration pays)
-    events[12.0].append((ExternalSource.OFFER_PRODUCT_OUT,
+    events[12.0].append((external_source.OFFER_PRODUCT_OUT,
                      OfferProduct(generateId("offer"), "steel", 3.0)))
 
     # t=14: Third demand + more steel
-    events[14.0].append((ExternalSource.DEMAND_PRODUCT_OUT,
+    events[14.0].append((external_source.DEMAND_PRODUCT_OUT,
                      DemandProduct(generateId("demand"), "widget")))
-    events[14.5].append((ExternalSource.PRODUCT_OUT,
+    events[14.5].append((external_source.PRODUCT_OUT,
                      Product(generateId("product"), "steel")))
-    events[15.0].append((ExternalSource.PRODUCT_OUT,
+    events[15.0].append((external_source.PRODUCT_OUT,
                      Product(generateId("product"), "steel")))
-    events[16.0].append((ExternalSource.PAYMENT_OUT,
+    events[16.0].append((external_source.PAYMENT_OUT,
                      Payment(generateId("payment"), 12.0)))
 
     # t=20: Fourth employee arrives
     emp4 = Employee(generateId("employee"))
-    events[20.0].append((ExternalSource.EMPLOYEE_OFFERING_OUT,
+    events[20.0].append((external_source.EMPLOYEE_OFFERING_OUT,
                      EmployeeOffering(generateId("employee_offer"), emp4)))
     employees.append(emp4)
 
     # t=25: Employee resignation (second employee resigns)
-    events[25.0].append((ExternalSource.EMPLOYEE_RESIGNATION_OUT,
+    events[25.0].append((external_source.EMPLOYEE_RESIGNATION_OUT,
                      EmployeeResignation(generateId("resign"), employees[1])))
 
     # --- GAP: no demand from t=16 to t=55 ---
     # Administration should halt production after IDLE_THRESHOLD_REVIEWS
 
     # t=55: Demand returns -> triggers undo halt
-    events[55.0].append((ExternalSource.DEMAND_PRODUCT_OUT,
+    events[55.0].append((external_source.DEMAND_PRODUCT_OUT,
                      DemandProduct(generateId("demand"), "widget")))
-    events[56.0].append((ExternalSource.PRODUCT_OUT,
+    events[56.0].append((external_source.PRODUCT_OUT,
                      Product(generateId("product"), "steel")))
-    events[56.5].append((ExternalSource.PRODUCT_OUT,
+    events[56.5].append((external_source.PRODUCT_OUT,
                      Product(generateId("product"), "steel")))
-    events[58.0].append((ExternalSource.PAYMENT_OUT,
+    events[58.0].append((external_source.PAYMENT_OUT,
                      Payment(generateId("payment"), 12.0)))
 
     # t=60: Fifth employee (to trigger FireEmployee if over max)
     employee = Employee(generateId("employee"))
-    events[60.0].append((ExternalSource.EMPLOYEE_OFFERING_OUT,
+    events[60.0].append((external_source.EMPLOYEE_OFFERING_OUT,
                      EmployeeOffering(generateId("employee_offer"), employee)))
     employees.append(employee)
 
     return dict(events)
 
 
-def generate_random_events(
-    seed: int = 42,
-    max_time: float = 100.0,
+def generate_random_events(external_source: ExternalSource,
+    seed: int = 42, max_time: float = 100.0,
 ) -> Dict[Time, List[Tuple[Port, Any]]]:
     """Generate events from exponential inter-arrival distributions.
 
@@ -167,7 +164,7 @@ def generate_random_events(
     e: Dict[Time, List[Tuple[Port, Any]]] = defaultdict(list)
 
     # Capital — one-shot at start
-    e[0.5].append((ExternalSource.CAPITAL_OUT,
+    e[0.5].append((external_source.CAPITAL_OUT,
                     Capital(generateId("capital"), 200.0)))
 
     # Customer demand (exponential, mean 5.0)
@@ -176,7 +173,7 @@ def generate_random_events(
         t += rng.expovariate(1.0 / 5.0)
         if t > max_time:
             break
-        e[round(t, 4)].append((ExternalSource.DEMAND_PRODUCT_OUT,
+        e[round(t, 4)].append((external_source.DEMAND_PRODUCT_OUT,
                                 DemandProduct(generateId("demand"), "widget")))
 
     # Raw material deliveries (exponential, mean 3.0)
@@ -185,7 +182,7 @@ def generate_random_events(
         t += rng.expovariate(1.0 / 3.0)
         if t > max_time:
             break
-        e[round(t, 4)].append((ExternalSource.PRODUCT_OUT,
+        e[round(t, 4)].append((external_source.PRODUCT_OUT,
                                 Product(generateId("product"), "steel")))
 
     # Employee offerings (exponential, mean 8.0)
@@ -197,7 +194,7 @@ def generate_random_events(
             break
         employee = Employee(generateId("employee"))
         employees.append(employee)
-        e[round(t, 4)].append((ExternalSource.EMPLOYEE_OFFERING_OUT,
+        e[round(t, 4)].append((external_source.EMPLOYEE_OFFERING_OUT,
                                 EmployeeOffering(generateId("employee_offer"), employee)))
 
     # Payments (follow demand with some delay)
@@ -207,7 +204,7 @@ def generate_random_events(
         if t > max_time:
             break
         pay = round(rng.uniform(8.0, 15.0), 2)
-        e[round(t, 4)].append((ExternalSource.PAYMENT_OUT,
+        e[round(t, 4)].append((external_source.PAYMENT_OUT,
                                 Payment(generateId("payment"), pay)))
 
     # Outside offers products to the company (exponential, mean 15.0)
@@ -217,7 +214,7 @@ def generate_random_events(
         if t > max_time:
             break
         cost = round(rng.uniform(2.0, 5.0), 2)
-        e[round(t, 4)].append((ExternalSource.OFFER_PRODUCT_OUT,
+        e[round(t, 4)].append((external_source.OFFER_PRODUCT_OUT,
                                 OfferProduct(generateId("offer"), "steel", cost)))
 
     # Employee resignations (sparse, exponential, mean 30.0)
@@ -228,7 +225,7 @@ def generate_random_events(
             break
         employee = rng.choice(employees)
         employees.remove(employee)
-        e[round(t, 4)].append((ExternalSource.EMPLOYEE_RESIGNATION_OUT,
+        e[round(t, 4)].append((external_source.EMPLOYEE_RESIGNATION_OUT,
                                 EmployeeResignation(generateId("resign"), employee)))
 
     return dict(e)
@@ -238,10 +235,8 @@ def generate_random_events(
 # Wiring
 # ---------------------------------------------------------------------------
 
-def build_graph(events: Dict[Time, List[Tuple[Port, Any]]]) -> Tuple[AtomicGraph, Simulator]:
-    graph = AtomicGraph()
-    simulator = Simulator(graph)
-
+def build_graph(graph: AtomicGraph, generate_events: Callable[[ExternalSource], Dict[Time, List[Tuple[Port, Any]]]])\
+        -> None:
     # --- Create models ---
     manufacturing = Manufacturing(
         bill_of_materials=BILL_OF_MATERIALS,
@@ -258,7 +253,7 @@ def build_graph(events: Dict[Time, List[Tuple[Port, Any]]]) -> Tuple[AtomicGraph
         producible_products=PRODUCIBLE_PRODUCTS,
         max_employees=10,
     )
-    source = ExternalSource(events)
+    source = ExternalSource(generate_events)
 
     graph.add_all([manufacturing, rnd, admin, source])
 
@@ -267,55 +262,52 @@ def build_graph(events: Dict[Time, List[Tuple[Port, Any]]]) -> Tuple[AtomicGraph
     # Administration -> Manufacturing:
     #   { ForceHaltProduction, UndoHaltProduction,
     #     AssignEmployee, UnassignEmployee }
-    graph.connect(admin.id, admin.ASSIGN_EMPLOYEE_MFG_OUT, manufacturing.id, manufacturing.ASSIGN_EMPLOYEE_IN)
-    graph.connect(admin.id, admin.UNASSIGN_EMPLOYEE_MFG_OUT, manufacturing.id, manufacturing.UNASSIGN_EMPLOYEE_IN)
-    graph.connect(admin.id, admin.FORCE_HALT_PRODUCTION_OUT, manufacturing.id, manufacturing.FORCE_HALT_PRODUCTION_IN)
-    graph.connect(admin.id, admin.UNDO_HALT_PRODUCTION_OUT, manufacturing.id, manufacturing.UNDO_HALT_PRODUCTION_IN)
+    graph.connect(admin.ASSIGN_EMPLOYEE_MFG_OUT, manufacturing.ASSIGN_EMPLOYEE_IN)
+    graph.connect(admin.UNASSIGN_EMPLOYEE_MFG_OUT, manufacturing.UNASSIGN_EMPLOYEE_IN)
+    graph.connect(admin.FORCE_HALT_PRODUCTION_OUT, manufacturing.FORCE_HALT_PRODUCTION_IN)
+    graph.connect(admin.UNDO_HALT_PRODUCTION_OUT, manufacturing.UNDO_HALT_PRODUCTION_IN)
 
     # Manufacturing -> Administration:
     #   { RequestEmployee, DemandProduct(Product(i)) }
-    graph.connect(manufacturing.id, manufacturing.REQUEST_EMPLOYEE_OUT, admin.id, admin.REQUEST_EMPLOYEE_IN)
-    graph.connect(manufacturing.id, manufacturing.DEMAND_PRODUCT_OUT, admin.id, admin.DEMAND_PRODUCT_IN)
+    graph.connect(manufacturing.REQUEST_EMPLOYEE_OUT, admin.REQUEST_EMPLOYEE_IN)
+    graph.connect(manufacturing.DEMAND_PRODUCT_OUT, admin.DEMAND_PRODUCT_IN)
 
     # Administration -> R&D:
     #   { AssignEmployee, UnassignEmployee, StartImprovements }
-    graph.connect(admin.id, admin.ASSIGN_EMPLOYEE_RD_OUT, rnd.id, rnd.ASSIGN_EMPLOYEE_IN)
-    graph.connect(admin.id, admin.UNASSIGN_EMPLOYEE_RD_OUT, rnd.id, rnd.UNASSIGN_EMPLOYEE_IN)
-    graph.connect(admin.id, admin.START_IMPROVEMENTS_OUT, rnd.id, rnd.START_IMPROVEMENTS_IN)
+    graph.connect(admin.ASSIGN_EMPLOYEE_RD_OUT, rnd.ASSIGN_EMPLOYEE_IN)
+    graph.connect(admin.UNASSIGN_EMPLOYEE_RD_OUT, rnd.UNASSIGN_EMPLOYEE_IN)
+    graph.connect(admin.START_IMPROVEMENTS_OUT, rnd.START_IMPROVEMENTS_IN)
 
     # R&D -> Administration:
     #   { RequestEmployee, ImprovementsCost, InformImprovementFinished }
-    graph.connect(rnd.id, rnd.REQUEST_EMPLOYEE_OUT, admin.id, admin.REQUEST_EMPLOYEE_IN)
-    graph.connect(rnd.id, rnd.IMPROVEMENTS_COST_OUT, admin.id, admin.IMPROVEMENTS_COST_IN)
-    graph.connect(rnd.id, rnd.INFORM_IMPROVEMENT_FINISHED_OUT, admin.id, admin.INFORM_IMPROVEMENT_FINISHED_IN)
+    graph.connect(rnd.REQUEST_EMPLOYEE_OUT, admin.REQUEST_EMPLOYEE_IN)
+    graph.connect(rnd.IMPROVEMENTS_COST_OUT, admin.IMPROVEMENTS_COST_IN)
+    graph.connect(rnd.INFORM_IMPROVEMENT_FINISHED_OUT, admin.INFORM_IMPROVEMENT_FINISHED_IN)
 
     # R&D -> Manufacturing: { Improvement }
-    graph.connect(rnd.id, rnd.IMPROVEMENT_OUT,
-                  manufacturing.id, manufacturing.IMPROVEMENT_IN)
+    graph.connect(rnd.IMPROVEMENT_OUT, manufacturing.IMPROVEMENT_IN)
 
     # --- External connections (ExternalSource -> Company inputs) ---
 
     # Capital, Payment -> Administration
-    graph.connect(source.id, source.CAPITAL_OUT, admin.id, admin.CAPITAL_IN)
-    graph.connect(source.id, source.PAYMENT_OUT, admin.id, admin.PAYMENT_IN)
+    graph.connect(source.CAPITAL_OUT, admin.CAPITAL_IN)
+    graph.connect(source.PAYMENT_OUT, admin.PAYMENT_IN)
 
     # EmployeeOffering, EmployeeResignation, OfferProduct -> Administration
-    graph.connect(source.id, source.EMPLOYEE_OFFERING_OUT, admin.id, admin.EMPLOYEE_OFFERING_IN)
-    graph.connect(source.id, source.EMPLOYEE_RESIGNATION_OUT, admin.id, admin.EMPLOYEE_RESIGNATION_IN)
-    graph.connect(source.id, source.OFFER_PRODUCT_OUT, admin.id, admin.OFFER_PRODUCT_IN)
+    graph.connect(source.EMPLOYEE_OFFERING_OUT, admin.EMPLOYEE_OFFERING_IN)
+    graph.connect(source.EMPLOYEE_RESIGNATION_OUT, admin.EMPLOYEE_RESIGNATION_IN)
+    graph.connect(source.OFFER_PRODUCT_OUT, admin.OFFER_PRODUCT_IN)
 
     # DemandProduct -> Manufacturing
-    graph.connect(source.id, source.DEMAND_PRODUCT_OUT, manufacturing.id, manufacturing.DEMAND_PRODUCT_IN)
+    graph.connect(source.DEMAND_PRODUCT_OUT, manufacturing.DEMAND_PRODUCT_IN)
 
     # Product (raw materials) -> Manufacturing
-    graph.connect(source.id, source.PRODUCT_OUT, manufacturing.id, manufacturing.PRODUCT_IN)
+    graph.connect(source.PRODUCT_OUT, manufacturing.PRODUCT_IN)
 
     # Company outputs (Product, OfferProduct from Manufacturing;
     # LookingForEmployee, FireEmployee, DemandProduct, Payment
     # from Administration) are unconnected — they print to console
     # via the models' output() methods.
-
-    return graph, simulator
 
 
 # ---------------------------------------------------------------------------
@@ -323,14 +315,19 @@ def build_graph(events: Dict[Time, List[Tuple[Port, Any]]]) -> Tuple[AtomicGraph
 # ---------------------------------------------------------------------------
 
 def main(mode: str = "scripted"):
+    graph = AtomicGraph()
+
     if mode == "scripted":
-        events = generate_scripted_events()
+        events = generate_scripted_events
     elif mode == "random":
-        events = generate_random_events()
+        events = generate_random_events
     else:
         raise ValueError(f"Unknown mode: {mode}")
 
-    graph, simulator = build_graph(events)
+    build_graph(graph, events)
+
+    simulator = Simulator(graph)
+
 
     print(f"=== Company Simulation ({mode} mode) ===\n")
 

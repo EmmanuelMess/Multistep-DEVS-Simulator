@@ -6,12 +6,13 @@ from typing import Dict, List, Any, Tuple
 import hypothesis.strategies as st
 from hypothesis import given
 
+from src.devs.Port import Port
 from src.devs import Constants
 from src.devs.Atomic import Atomic
 from src.devs.AtomicGraph import AtomicGraph
 from src.devs.IdGenerator import generateId
 from src.devs.Simulator import Simulator
-from src.devs.Types import Time, Port, Id
+from src.devs.Types import Time, Id
 
 
 @dataclass
@@ -19,12 +20,12 @@ class _Message:
     id: Id
     port: Port
 
-def create_atomic_pair(n: int) -> Tuple[Atomic, Atomic]:
+def create_atomic_pair(n: int, output_id: Id, output_ports: List[Port], input_id: Id, input_ports: List[Port]) -> Tuple[Atomic, Atomic]:
     class _SingleStepAtomicOutput(Atomic):
         def __init__(self) -> None:
-            super().__init__(generateId("single_step_atomic_output"))
+            super().__init__(output_id)
             self.has_run: bool = False
-            self.ports = [(i, _Message) for i in range(n)]
+            self.ports = output_ports
             self.set_outports(self.ports)
 
         def delta_internal(self) -> None:
@@ -44,9 +45,9 @@ def create_atomic_pair(n: int) -> Tuple[Atomic, Atomic]:
 
     class _SingleStepAtomicInput(Atomic):
         def __init__(self) -> None:
-            super().__init__(generateId("single_step_atomic_input"))
+            super().__init__(input_id)
             self.has_run: bool = False
-            self.ports = [(i, _Message) for i in range(n)]
+            self.ports = input_ports
             self.set_inports(self.ports)
 
         def delta_internal(self) -> None:
@@ -73,18 +74,25 @@ def create_atomic_pair(n: int) -> Tuple[Atomic, Atomic]:
 
 @given(n=st.integers(min_value=0, max_value=Constants.MAX_PORTS), r=st.randoms())
 def test_time_flow_foward(n, r: Random):
-    port_connections = list(range(n))
-    r.shuffle(port_connections)
+    output_id = generateId("single_step_atomic_output")
+    ports_output = [Port(generateId("single_step_atomic_output_port"), output_id, _Message) for _ in range(n)]
+    input_id = generateId("single_step_atomic_input")
+    ports_input = [Port(generateId("single_step_atomic_input_port"), input_id, _Message) for _ in range(n)]
+
+    # Shuffle everything
+    r.shuffle(ports_output)
+
+    port_connections = zip(ports_output, ports_input)
 
     graph = AtomicGraph()
     simulator = Simulator(graph)
 
-    output, input = create_atomic_pair(n)
+    output, input = create_atomic_pair(n, output_id, ports_output, input_id, ports_input)
     graph.add(output)
     graph.add(input)
 
-    for a_port, b_port in enumerate(port_connections):
-        graph.connect(output.id, (a_port, _Message), input.id, (b_port, _Message))
+    for out_port, in_port in port_connections:
+        graph.connect(out_port, in_port)
 
     assert graph.min_next_time(simulator.time) == 0.0
 

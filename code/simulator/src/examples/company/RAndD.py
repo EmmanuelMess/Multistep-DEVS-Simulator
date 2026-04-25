@@ -1,9 +1,10 @@
 from copy import deepcopy
 from typing import List, Any, Dict, Optional, cast, override
 
+from src.devs.Port import Port
 from src.devs.Atomic import Atomic
 from src.devs.IdGenerator import generateId
-from src.devs.Types import Port, Time
+from src.devs.Types import Time
 from src.examples.company.Messages import (
     AssignEmployee, UnassignEmployee, StartImprovements, Improvement,
     RequestEmployee, ImprovementsCost, InformImprovementFinished, Employee,
@@ -25,17 +26,6 @@ class RAndD(Atomic):
     WORKING = "working"            # producing improvement
     EMIT_RESULT = "emit_result"    # emitting Improvement + InformImprovementFinished
 
-    # --- Input ports ---
-    ASSIGN_EMPLOYEE_IN = (0, AssignEmployee)
-    START_IMPROVEMENTS_IN = (1, StartImprovements)
-    UNASSIGN_EMPLOYEE_IN = (2, UnassignEmployee)
-
-    # --- Output ports ---
-    IMPROVEMENT_OUT = (0, Improvement)
-    REQUEST_EMPLOYEE_OUT = (1, RequestEmployee)
-    IMPROVEMENTS_COST_OUT = (2, ImprovementsCost)
-    INFORM_IMPROVEMENT_FINISHED_OUT = (3, InformImprovementFinished)
-
     PROCESSING_DELAY = 2.0
 
     def __init__(
@@ -45,6 +35,18 @@ class RAndD(Atomic):
         improvement_cost: float = 20.0,
     ):
         super().__init__(generateId("r_and_d"))
+
+        # --- Input ports ---
+        self.ASSIGN_EMPLOYEE_IN = Port(generateId("r_and_d_port"), self.id, AssignEmployee)
+        self.START_IMPROVEMENTS_IN = Port(generateId("r_and_d_port"), self.id, StartImprovements)
+        self.UNASSIGN_EMPLOYEE_IN = Port(generateId("r_and_d_port"), self.id, UnassignEmployee)
+
+        # --- Output ports ---
+        self.IMPROVEMENT_OUT = Port(generateId("r_and_d_port"), self.id, Improvement)
+        self.REQUEST_EMPLOYEE_OUT = Port(generateId("r_and_d_port"), self.id, RequestEmployee)
+        self.IMPROVEMENTS_COST_OUT = Port(generateId("r_and_d_port"), self.id, ImprovementsCost)
+        self.INFORM_IMPROVEMENT_FINISHED_OUT = Port(generateId("r_and_d_port"), self.id, InformImprovementFinished)
+
         self.improvement_duration = improvement_duration
         self.efficiency_gain = efficiency_gain
         self.improvement_cost = improvement_cost

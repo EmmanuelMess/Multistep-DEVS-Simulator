@@ -3,13 +3,14 @@ from typing import Dict, List, Any
 from hypothesis import given, reproduce_failure
 import hypothesis.strategies as st
 
+from src.devs.Port import Port
 from src.devs.AtomicGroup import AtomicGroup
 from src.devs import Constants
 from src.devs.Atomic import Atomic
 from src.devs.AtomicGraph import AtomicGraph
 from src.devs.IdGenerator import generateId
 from src.devs.Simulator import Simulator
-from src.devs.Types import Port, Time
+from src.devs.Types import Time
 
 
 class _SingleStepAtomic(Atomic):

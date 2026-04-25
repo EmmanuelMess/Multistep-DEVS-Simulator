@@ -19,9 +19,9 @@ def main():
     graph.add(factory)
     graph.add(market)
 
-    graph.connect(capitalMarket.id, capitalMarket.CAPITAL_OUTPUT_PORT, factory.id, factory.CAPITAL_INPUT_PORT)
-    graph.connect(factory.id, factory.ITEM_OUTPUT_PORT, market.id, market.SELL_ORDER_INPUT_PORT)
-    graph.connect(market.id, market.MONEY_TRANSFER_OUTPUT_PORT, factory.id, factory.MONEY_TRANSFER_INPUT_PORT)
+    graph.connect(capitalMarket.CAPITAL_OUTPUT_PORT, factory.CAPITAL_INPUT_PORT)
+    graph.connect(factory.ITEM_OUTPUT_PORT,market.SELL_ORDER_INPUT_PORT)
+    graph.connect(market.MONEY_TRANSFER_OUTPUT_PORT, factory.MONEY_TRANSFER_INPUT_PORT)
 
     next_time = graph.min_next_time(simulator.time)
     while math.isfinite(next_time):

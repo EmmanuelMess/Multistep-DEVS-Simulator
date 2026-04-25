@@ -4,7 +4,7 @@ from typing import List, Any, Dict, cast, override
 
 from src.devs.Atomic import Atomic
 from src.devs.IdGenerator import generateId
-from src.devs.Types import Port
+from src.devs.Port import Port
 
 
 @dataclass
@@ -13,10 +13,10 @@ class Capital:
     amount: float
 
 class CapitalProvider(Atomic):
-    CAPITAL_OUTPUT_PORT = (0, Capital)
-
     def __init__(self):
         super().__init__(generateId("capital_provider"))
+        self.CAPITAL_OUTPUT_PORT = Port(generateId("capital_provider_port"), self.id, Capital)
+
         self.totalCapital = 100
         self.assigment = 2
         self.period = 2

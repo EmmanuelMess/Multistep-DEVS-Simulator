@@ -3,9 +3,10 @@ from typing import List, Any, Dict, Optional, cast, override, Set
 
 from deal import pre
 
+from src.devs.Port import Port
 from src.devs.Atomic import Atomic
 from src.devs.IdGenerator import generateId
-from src.devs.Types import Port, Time
+from src.devs.Types import Time
 from src.examples.company.Messages import (
     Product, DemandProduct, OfferProduct, AssignEmployee, UnassignEmployee,
     ForceHaltProduction, UndoHaltProduction, Improvement,
@@ -14,21 +15,6 @@ from src.examples.company.Messages import (
 
 
 class Manufacturing(Atomic):
-    # --- Input ports ---
-    DEMAND_PRODUCT_IN = (0, DemandProduct)
-    PRODUCT_IN = (1, Product)
-    ASSIGN_EMPLOYEE_IN = (2, AssignEmployee)
-    FORCE_HALT_PRODUCTION_IN = (3, ForceHaltProduction)
-    UNDO_HALT_PRODUCTION_IN = (4, UndoHaltProduction)
-    IMPROVEMENT_IN = (5, Improvement)
-    UNASSIGN_EMPLOYEE_IN = (6, UnassignEmployee)
-
-    # --- Output ports ---
-    PRODUCT_OUT = (0, Product)
-    DEMAND_PRODUCT_OUT = (1, DemandProduct)
-    OFFER_PRODUCT_OUT = (2, OfferProduct)
-    REQUEST_EMPLOYEE_OUT = (3, RequestEmployee)
-
     REVIEW_PERIOD = 2.0
     MIN_BASE_TIME = 1.5
 
@@ -42,6 +28,21 @@ class Manufacturing(Atomic):
         product_costs: {product_type: cost} — used when offering products
         """
         super().__init__(generateId("manufacturing"))
+
+        # --- Input ports ---
+        self.DEMAND_PRODUCT_IN = Port(generateId("manufacturing_port"), self.id, DemandProduct)
+        self.PRODUCT_IN = Port(generateId("manufacturing_port"), self.id, Product)
+        self.ASSIGN_EMPLOYEE_IN = Port(generateId("manufacturing_port"), self.id, AssignEmployee)
+        self.FORCE_HALT_PRODUCTION_IN = Port(generateId("manufacturing_port"), self.id, ForceHaltProduction)
+        self.UNDO_HALT_PRODUCTION_IN = Port(generateId("manufacturing_port"), self.id, UndoHaltProduction)
+        self.IMPROVEMENT_IN = Port(generateId("manufacturing_port"), self.id, Improvement)
+        self.UNASSIGN_EMPLOYEE_IN = Port(generateId("manufacturing_port"), self.id, UnassignEmployee)
+
+        # --- Output ports ---
+        self.PRODUCT_OUT = Port(generateId("manufacturing_port"), self.id, Product)
+        self.DEMAND_PRODUCT_OUT = Port(generateId("manufacturing_port"), self.id, DemandProduct)
+        self.OFFER_PRODUCT_OUT = Port(generateId("manufacturing_port"), self.id, OfferProduct)
+        self.REQUEST_EMPLOYEE_OUT = Port(generateId("manufacturing_port"), self.id, RequestEmployee)
 
         self.bill_of_materials = bill_of_materials
         self.product_costs = product_costs

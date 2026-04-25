@@ -1,3 +1,4 @@
+from src.devs.Port import Port
 from src.devs.Constants import MAX_PORTS
 from abc import ABCMeta, abstractmethod
 from math import isfinite
@@ -5,7 +6,7 @@ from typing import Dict, Optional, List, Any
 
 from deal import pre, ensure, post, pure
 
-from src.devs.Types import Id, Port, Time
+from src.devs.Types import Id, Time
 
 
 class Atomic(metaclass=ABCMeta):

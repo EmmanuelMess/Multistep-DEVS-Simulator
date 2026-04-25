@@ -19,6 +19,10 @@ def main():
     graph.add_all([capitalMarket, factory, market])
     graph.groups.add_group(group)
 
+    graph.connect(capitalMarket.CAPITAL_OUTPUT_PORT, factory.CAPITAL_INPUT_PORT)
+    graph.connect(factory.ITEM_OUTPUT_PORT,market.SELL_ORDER_INPUT_PORT)
+    graph.connect(market.MONEY_TRANSFER_OUTPUT_PORT, factory.MONEY_TRANSFER_INPUT_PORT)
+
     app = App(graph)
     app.run()
 

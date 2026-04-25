@@ -4,6 +4,7 @@
 #include <raymath.h>
 #include <rlgl.h>
 #include <stdio.h>
+#include <unistd.h>
 
 #include "library/dictionary.h"
 
