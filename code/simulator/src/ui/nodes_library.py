@@ -177,6 +177,6 @@ def create_global_state(
     )
     return result
 
-def run_window(resources_path: str, width: int, height: int, global_state: ctypes.POINTER(GlobalState)):
+def run_window(resources_path: str, width: int, height: int, global_state: ctypes.POINTER(GlobalState)):  # pyrefly: ignore
     nodes_library.run_window.argtypes = [ctypes.c_char_p, ctypes.c_int, ctypes.c_int, ctypes.POINTER(GlobalState)]
     nodes_library.run_window(resources_path.encode("utf-8"), width, height, global_state)

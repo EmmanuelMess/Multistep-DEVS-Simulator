@@ -71,7 +71,6 @@ class AtomicGraph:
         :return: Models with input
         """
         for output_model_id in model_ids:
-            model = self._models[output_model_id]
             outputs: Dict[Port, List[Any]] = self._models[output_model_id].output()
 
             for output_port in outputs.keys():
@@ -83,7 +82,9 @@ class AtomicGraph:
                     continue
 
                 input_ports_ids = self._connections[output_port]
-                for input_model_id, input_model_port in input_ports_ids:
+                for input_model_port in input_ports_ids:
+                    input_model_id = input_model_port.atomic_id
+
                     if input_model_id not in self.models_input_cache:
                         self.models_input_cache[input_model_id] = {}
 
