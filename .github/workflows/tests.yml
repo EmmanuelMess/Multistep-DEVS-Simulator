@@ -42,7 +42,7 @@ jobs:
       - name: Build C
         working-directory: ./code/nodes-gui
         # Build your program with the given configuration
-        run: cmake --build ${{github.workspace}}/build --config Release
+        run: cmake --build ${{github.workspace}}/build --target nodes_library --config Release
         
       - name: Set up Python ${{ matrix.version }}
         uses: actions/setup-python@v5
