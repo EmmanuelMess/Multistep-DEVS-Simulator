@@ -21,21 +21,21 @@ class App:
 
     @staticmethod
     def _parse_graph(graph: AtomicGraph) -> GlobalState:
-        group_blocks: List[ctypes.POINTER(GroupBlock)] = []
+        group_blocks: List[ctypes.POINTER(GroupBlock)] = []  # pyrefly: ignore
 
         atomics_in_groups: List[Id] = []
         for i, group in enumerate(graph.groups):
             atomics_in_group: List[Id] = [atomic_id for atomic_id in group]
 
-            atomic_blocks: List[ctypes.POINTER(AtomicBlock)] = []
+            atomic_blocks: List[ctypes.POINTER(AtomicBlock)] = []  # pyrefly: ignore
             for j, atomic_id in enumerate(group):
                 atomic: Atomic = graph.models[atomic_id]
 
-                input_ports: List[ctypes.POINTER(Port)] = []
+                input_ports: List[ctypes.POINTER(Port)] = []  # pyrefly: ignore
                 for input_port in atomic.input_ports:
                     input_ports.append(nodes_library.blocks_create_port(input_port.id, input_port.id))
 
-                output_ports: List[ctypes.POINTER(Port)] = []
+                output_ports: List[ctypes.POINTER(Port)] = []  # pyrefly: ignore
                 for output_port in atomic.output_ports:
                     output_ports.append(nodes_library.blocks_create_port(output_port.id, output_port.id))
 
@@ -55,16 +55,16 @@ class App:
             group_blocks.append(group_block)
             atomics_in_groups += atomics_in_group
 
-        free_atomics: List[ctypes.POINTER(AtomicBlock)] = []
+        free_atomics: List[ctypes.POINTER(AtomicBlock)] = []  # pyrefly: ignore
 
         for i, (atomic_id, atomic) in enumerate(graph.models.items()):
             if atomic_id in atomics_in_groups:
                 continue
 
-            input_ports: List[ctypes.POINTER(Port)] = []
+            input_ports: List[ctypes.POINTER(Port)] = []  # pyrefly: ignore
             for input_port in atomic.input_ports:
                 input_ports.append(nodes_library.blocks_create_port(input_port.id, input_port.id))
-            output_ports: List[ctypes.POINTER(Port)] = []
+            output_ports: List[ctypes.POINTER(Port)] = []  # pyrefly: ignore
             for output_port in atomic.output_ports:
                 output_ports.append(nodes_library.blocks_create_port(output_port.id, output_port.id))
 
@@ -76,7 +76,7 @@ class App:
 
             free_atomics.append(atomic_block)
 
-        connections: List[ctypes.POINTER(Connection)] = []
+        connections: List[ctypes.POINTER(Connection)] = []  # pyrefly: ignore
         for out_port, in_ports in graph.connections.items():
             for in_port in in_ports:
                 connection = nodes_library.blocks_create_connection(out_port.id, in_port.id)
