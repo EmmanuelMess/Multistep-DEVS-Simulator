@@ -1,8 +1,9 @@
+from devs.Simulator import Simulator
 from src.devs.Atomic import Atomic
 from src.ui import nodes_library
 from src.ui.blocks import Port, Connection
 import ctypes
-from typing import List
+from typing import List, Optional
 
 from src.devs.AtomicGraph import AtomicGraph
 from src.devs.Types import Id
@@ -11,13 +12,15 @@ from src.ui.blocks import GroupBlock, AtomicBlock, GlobalState, Position
 
 class App:
     def __init__(self, graph: AtomicGraph):
-        self.global_state = self._parse_graph(graph)
+        self._global_state = self._parse_graph(graph)
+        self._simulator: Optional[Simulator] = None
 
-    def run(self):
-        state = self.global_state
-        nodes_library.run_window("./nodes-gui/lib/resources",800, 450, state)
+    def run(self, simulator: Simulator):
+        self._simulator = simulator
+        nodes_library.run_window("./nodes-gui/lib/resources",800, 450, self._global_state)
 
-    def _parse_graph(self, graph: AtomicGraph) -> GlobalState:
+    @staticmethod
+    def _parse_graph(graph: AtomicGraph) -> GlobalState:
         group_blocks: List[ctypes.POINTER(GroupBlock)] = []
 
         atomics_in_groups: List[Id] = []

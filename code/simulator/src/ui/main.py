@@ -6,7 +6,7 @@ def main():
     graph, simulator = CompanyGraph.generate_graph(Mode.SCRIPTED)
 
     app = App(graph)
-    app.run()
+    app.run(simulator)
 
 
 if __name__ == '__main__':
