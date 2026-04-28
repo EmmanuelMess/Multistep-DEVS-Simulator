@@ -263,7 +263,17 @@ static void draw_connections(const struct GlobalState* state) {
 
 		const Color color = connection->activated? ACTIVATED_CONNECTION_COLOR:DEACTIVATED_CONNECTION_COLOR;
 
-		DrawLineBezier(convert_position(port_input->position_global), convert_position(port_output->position_global), 2, color);
+		const Vector2 start = convert_position(port_input->position_global);
+		const Vector2 end = convert_position(port_output->position_global);
+
+		const Vector2 control_start = Vector2Add(start, (Vector2) {.x = 100.0f, .y = 0});
+		const Vector2 control_end = Vector2Add(end, (Vector2) {.x = -100.0f, .y = 0});
+
+		const Vector2 bezier_points[] = {
+			start, control_start, control_end, end
+		};
+
+		DrawSplineBezierCubic(bezier_points, 4, 2, color);
 	}
 }
 
