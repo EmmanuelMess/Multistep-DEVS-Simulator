@@ -1,12 +1,12 @@
 import math
-from typing import Dict, List, Any, Tuple
+from typing import Dict, List, Any
 
 from deal import pre, ensure
 
-from src.devs.Port import Port
 from src.devs.Atomic import Atomic
 from src.devs.AtomicGroups import AtomicGroups
 from src.devs.Constants import MAX_ATOMICS
+from src.devs.Port import Port
 from src.devs.Types import Id, Time
 
 
