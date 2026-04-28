@@ -1,4 +1,4 @@
-from devs.Simulator import Simulator
+from src.devs.Simulator import Simulator
 from src.devs.Atomic import Atomic
 from src.ui import nodes_library
 from src.ui.blocks import Port, Connection

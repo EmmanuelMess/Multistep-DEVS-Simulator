@@ -1,6 +1,6 @@
 import math
 
-from examples.factories.FactoriesGraph import FactoriesGraph
+from src.examples.factories.FactoriesGraph import FactoriesGraph
 
 
 def main():

@@ -1,4 +1,4 @@
-from examples.company.CompanyGraph import CompanyGraph, Mode
+from src.examples.company.CompanyGraph import CompanyGraph, Mode
 from src.ui.App import App
 
 
