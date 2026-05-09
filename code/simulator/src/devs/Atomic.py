@@ -15,6 +15,11 @@ class Atomic(metaclass=ABCMeta):
         self.output_ports: List[Port] = []
         self.id = id
         self.time_last_internal_transition: Optional[float] = None
+        self._group_id: Optional[Id] = None
+
+    @property
+    def group_id(self) -> Optional[Id]:
+        return self._group_id
 
     @abstractmethod
     def delta_internal(self) -> None:

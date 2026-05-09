@@ -1,9 +1,14 @@
+from dataclasses import dataclass, Field, field
+
+from grandalf.graphs import Graph, Edge, Vertex
+from grandalf.layouts import SugiyamaLayout
+
 from src.devs.Simulator import Simulator
 from src.devs.Atomic import Atomic
 from src.ui import nodes_library
 from src.ui.blocks import Port, Connection
 import ctypes
-from typing import List, Optional
+from typing import List, Optional, Dict, Tuple
 
 from src.devs.AtomicGraph import AtomicGraph
 from src.devs.Types import Id
@@ -21,12 +26,11 @@ class App:
 
     @staticmethod
     def _parse_graph(graph: AtomicGraph) -> GlobalState:
+        computed_positions = App._generate_positions(graph)
+
         group_blocks: List[ctypes.POINTER(GroupBlock)] = []  # pyrefly: ignore
 
-        atomics_in_groups: List[Id] = []
         for i, group in enumerate(graph.groups):
-            atomics_in_group: List[Id] = [atomic_id for atomic_id in group]
-
             atomic_blocks: List[ctypes.POINTER(AtomicBlock)] = []  # pyrefly: ignore
             for j, atomic_id in enumerate(group):
                 atomic: Atomic = graph.models[atomic_id]
@@ -39,10 +43,12 @@ class App:
                 for output_port in atomic.output_ports:
                     output_ports.append(nodes_library.blocks_create_port(output_port.id, output_port.id))
 
+                position_x, position_y = computed_positions[atomic_id]
+
                 atomic_block = nodes_library.blocks_create_atomic(
                     atomic_id, atomic.__class__.__name__, input_ports, output_ports,
-                    Position( ctypes.c_float(0),  ctypes.c_float(j * 100)),
-                    400.0, 100.0
+                    Position( position_x, position_y),
+                    400.0, App._compute_height(atomic)
                 )
 
                 atomic_blocks.append(atomic_block)
@@ -53,12 +59,11 @@ class App:
                 250.0, 100.0
             )
             group_blocks.append(group_block)
-            atomics_in_groups += atomics_in_group
 
         free_atomics: List[ctypes.POINTER(AtomicBlock)] = []  # pyrefly: ignore
 
         for i, (atomic_id, atomic) in enumerate(graph.models.items()):
-            if atomic_id in atomics_in_groups:
+            if atomic.group_id is not None:
                 continue
 
             input_ports: List[ctypes.POINTER(Port)] = []  # pyrefly: ignore
@@ -68,10 +73,12 @@ class App:
             for output_port in atomic.output_ports:
                 output_ports.append(nodes_library.blocks_create_port(output_port.id, output_port.id))
 
+            position_x, position_y = computed_positions[atomic_id]
+
             atomic_block = nodes_library.blocks_create_atomic(
                 atomic_id, atomic.__class__.__name__, input_ports, output_ports,
-                Position( ctypes.c_float(-300),  ctypes.c_float(i * 100)),
-                400.0, 100.0
+                Position( position_x, position_y),
+                400.0, App._compute_height(atomic)
             )
 
             free_atomics.append(atomic_block)
@@ -87,3 +94,58 @@ class App:
         )
 
         return global_state
+
+    @staticmethod
+    def _generate_positions(atomic_graph: AtomicGraph) -> Dict[Id, Tuple[float, float]]:
+        @dataclass
+        class Box:
+            w: float = field()
+            h: float = field()
+            x: float = field(default=0)
+            y: float = field(default=0)
+
+        vertices: Dict[Id, Vertex] = {}
+        edges: List[Edge] = []
+        boxes: Dict[Id, Box] = {}
+
+        for i, group in enumerate(atomic_graph.groups):
+            for j, atomic_id in enumerate(group):
+                atomic: Atomic = atomic_graph.models[atomic_id]
+
+                vertices[atomic_id] = Vertex(atomic_id)
+                boxes[atomic_id] = Box(400, App._compute_height(atomic))
+
+        for i, (atomic_id, atomic) in enumerate(atomic_graph.models.items()):
+            if atomic.group_id is not None:
+                continue
+
+            vertices[atomic_id] = Vertex(atomic_id)
+            boxes[atomic_id] = Box(400, App._compute_height(atomic))
+
+        for out_port, in_ports in atomic_graph.connections.items():
+            for in_port in in_ports:
+                edge = Edge(vertices[out_port.atomic_id], vertices[in_port.atomic_id])
+                edges.append(edge)
+
+        graph = Graph(vertices.values(), edges)
+
+        for (atomic_id, box) in boxes.items():
+            # noinspection PyUnresolvedReferences
+            vertices[atomic_id].view = box
+
+        sugiyama = SugiyamaLayout(graph.C[0])  # pass connected components
+        sugiyama.init_all()
+        sugiyama.draw()
+
+        computed_positions: Dict[Id, Tuple[float, float]] = {}
+        for atomic_id, v in vertices.items():
+            cx, cy = v.view.xy
+            x = cx - v.view.w / 2
+            y = cy - v.view.h / 2
+            computed_positions[atomic_id] = (x, y)
+
+        return computed_positions
+
+    @staticmethod
+    def _compute_height(atomic: Atomic) -> float:
+        return 50 + max(len(atomic.input_ports), len(atomic.output_ports)) * 10
